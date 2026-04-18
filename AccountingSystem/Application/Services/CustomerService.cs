@@ -11,71 +11,66 @@ namespace AccountingSystem.Application.Services
         private List<Customer> customers = new List<Customer>();
         public int nextId;
 
-        public void AddClient(Customer customer)
+        public void AddCustomer(Customer customer)
         {
 
             customer.Id = nextId;
-            nextId ++;
+            nextId++;
             customers.Add(customer);
         }
 
-        public Domain.Enums.CustomerEditResult EditClient(Customer customer)
+        public Domain.Enums.CustomerEditResult EditCustomer(Customer customer)
         {
             var existing = customers.Find(x => x.Name == customer.Name);
-            if (existing != null)
-            {
-                existing.Name = customer.Name;
-                existing.Address = customer.Address;
-                return Domain.Enums.CustomerEditResult.Success;
-            }
-            else
+            if (existing == null)
             {
                 return Domain.Enums.CustomerEditResult.NotFound;
             }
-        }
-
-        public void ShowAllClients()
-        {
-            foreach (var Customer in customers)
+            if (existing.IsArchived == true)
             {
-                Console.WriteLine($"Name: {Customer.Name}(Id: {Customer.Id})");
+                return Domain.Enums.CustomerEditResult.CustomerArchived;
             }
+            existing.Name = customer.Name;
+            existing.Address = customer.Address;
+            existing.Wallet = customer.Wallet;
+            existing.Email = customer.Email;
+            return Domain.Enums.CustomerEditResult.Success;
+        }
+
+        public List<Customer> GetAllCustomers()
+        {
+            return customers;
         }
 
 
-        public void ShowClient(Customer customer)
+        public Customer FindCustomer(string Name)
         {
-            var existing = customers.Find(x => x.Name == customer.Name);
+            var existing = customers.Find(x => x.Name == Name);
             if (existing != null)
             {
-                Console.WriteLine($"Name: {customer.Name} Id: {customer.Id} Address: {customer.Address} Wallet: {customer.Wallet} ");
+                return existing;
             }
             else
             {
-                Console.WriteLine("Customer not found. Try again");
+                return null;
             }
         }
 
-        public void ArchiveClient(Customer customer)
+        public Domain.Enums.ArchiveCustomerResult ArchiveCustomer(string Name)
         {
-            var existing = customers.Find(x => x.Name == customer.Name);
-            if (existing != null)
+            var existing = customers.Find(x => x.Name == Name);
+            if (existing == null)
             {
-                if(existing.Wallet.InDebt == false)
-                {
-                    existing.IsArchived = true;
-                }
-                else
-                {
-                    Console.WriteLine("Customer didn't pay all debt. Can't archive.");
-                }
-
-            }
-            else
-            {
-                Console.WriteLine("Customer not found. Try again");
+                return Domain.Enums.ArchiveCustomerResult.NotFound;
             }
 
+            if (existing.Wallet.InDebt == true)
+            {
+                return Domain.Enums.ArchiveCustomerResult.CustomerInDebt;
+            }
+
+            existing.IsArchived = true;
+            return Domain.Enums.ArchiveCustomerResult.Success;
         }
     }
 }

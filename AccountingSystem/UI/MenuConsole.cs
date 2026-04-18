@@ -9,12 +9,11 @@ namespace AccountingSystem.UI
 {
     internal class MenuConsole
     {
-        CustomerService _customerService;
+        
 
         public void MainMenu()
         {
             bool isActiveMainMenu = true;
-            _customerService = new CustomerService();
 
 
             while (isActiveMainMenu)
@@ -58,42 +57,50 @@ namespace AccountingSystem.UI
         public void CustomerMenu()
         {
             bool isCustomerMenuActive = true;
+            var customerService = new CustomerService();
+            var customerUI = new CustomerUI(customerService);
 
 
             while (isCustomerMenuActive)
             {
-                Console.WriteLine("1- to add client, 2- to edit client, 3- to show all clients name, 4- to search a client by name or ID, s - to save, q -  to save and quit");
+                Console.WriteLine("1- to add client, 2- to edit client, 3- to show all clients name, 4- to search a client by name or ID, r - to return to main menu");
                 Console.Write("Type your option: ");
                 string inputChoiceMenu = Console.ReadLine();
                 switch (inputChoiceMenu.Trim().ToLower())
                 {
                     case "1":
                         {
-                            var customer = GetCustomerInput();
-                            _customerService.AddClient(customer);
+                            customerUI.AddCustomerFlow();
                         }
                         break;
+
                     case "2":
-                        Console.WriteLine("To edit customer just fill fields below. If there is a customer matching your name or Id, data will change");
                         {
-                            var customer = GetCustomerInput();
-                            _customerService.EditClient(customer);
+                            customerUI.EditCustomerFlow();
+
                         }
                         break;
+
                     case "3":
-                            _customerService.ShowAllClients();
+                        {
+                            customerUI.GetAllCustomerFlow();
+
+                        }
                         break;
 
                     case "4":
                         {
-                            var customer = GetCustomerInput();
-                            _customerService.ShowClient(customer);
+                            customerUI.FindCustomerFlow();
                         }
                         break;
-                    case "s":
+
+                    case "5":
+                        {
+                            customerUI.FindCustomerFlow();
+                        }
                         break;
 
-                    case "q":
+                    case "r":
                         isCustomerMenuActive = false;
                         break;
 
@@ -105,61 +112,25 @@ namespace AccountingSystem.UI
             }
         }
 
-
         public void InvoiceMenu()
         {
 
         }
-
 
         public void OrderMenu()
         {
 
         }
 
-
         public void QuantationMenu()
         {
 
         }
 
-
         public void PaymentMenu()
         {
 
         }
-
-        public Customer GetCustomerInput()
-        {
-            Console.Write("add name of the company/client: ");
-            string name = Console.ReadLine();
-            Console.Write("add zip code of the company/client: ");
-            string zip = Console.ReadLine();
-            Console.Write("add city of the company/client: ");
-            string city = Console.ReadLine();
-            Console.Write("add street of the company/client: ");
-            string street = Console.ReadLine();
-
-            var address = new Domain.Entities.Address
-            {
-                ZipCode = zip,
-                City = city,
-                Street = street
-            };
-
-            var customer = new Domain.Entities.Customer
-            {
-                Name = name,
-                Address = address
-            };
-            return customer;
-
-
-
-        }
-
-
-
-
     }
 }
+
