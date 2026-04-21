@@ -2,30 +2,40 @@
 using AccountingSystem.Domain.Entities;
 using System;
 using System.Collections.Generic;
-using System.Net;
-using System.Text;
-using System.Xml.Linq;
 
 namespace AccountingSystem.UI
 {
     internal class CustomerUI
     {
-        CustomerService _customerService;
+        private CustomerService _customerService;
+
         public CustomerUI(CustomerService customerService)
         {
             _customerService = customerService;
-
         }
 
         public void AddCustomerFlow()
         {
             var customer = GetCustomerInput();
-            _customerService.AddCustomer(customer);
+
+            var response = _customerService.AddCustomer(customer);
+
+            if (!response.IsSuccess)
+            {
+                foreach (var error in response.Errors)
+                {
+                    Console.WriteLine(error);
+                }
+                return;
+            }
+
+            Console.WriteLine("Customer added successfully");
         }
 
         public void EditCustomerFlow()
         {
-            Console.WriteLine("To edit customer just fill fields below. If there is a customer matching your name or Id, data will change");
+            Console.WriteLine("To edit customer just fill fields below. If there is a customer matching your Id, data will change");
+
             var customer = GetCustomerInput();
             _customerService.EditCustomer(customer);
         }
@@ -33,19 +43,30 @@ namespace AccountingSystem.UI
         public void GetAllCustomerFlow()
         {
             List<Customer> customers = _customerService.GetAllCustomers();
+
             foreach (var c in customers)
             {
-                Console.WriteLine($"Name: {c.Name}, Id: {c.Id}, Email: {c.Email},\nZip Code: {c.Address.ZipCode}, Street: {c.Address.Street}, City: {c.Address.City},\nWallet: {c.Wallet} ");
+                Console.WriteLine(
+                    $"Name: {c.Name}, Id: {c.Id}, Email: {c.Email},\n" +
+                    $"Zip Code: {c.Address.ZipCode}, Street: {c.Address.Street}, City: {c.Address.City},\n" +
+                    $"Wallet: {c.Wallet}"
+                );
             }
         }
 
         public void FindCustomerFlow()
         {
-            string name = GetCustomerName();
-            var result = _customerService.FindCustomer(name);
+            int idSearch = GetCustomerId();
+
+            var result = _customerService.FindCustomer(idSearch);
+
             if (result != null)
             {
-                Console.WriteLine($"Name: {result.Name} Id: {result.Id},Email: {result.Email},\nZip Code: {result.Address.ZipCode}, Street: {result.Address.Street}, City: {result.Address.City},\nWallet: {result.Wallet} ");
+                Console.WriteLine(
+                    $"Name: {result.Name}, Id: {result.Id}, Email: {result.Email},\n" +
+                    $"Zip Code: {result.Address.ZipCode}, Street: {result.Address.Street}, City: {result.Address.City},\n" +
+                    $"Wallet: {result.Wallet}"
+                );
             }
             else
             {
@@ -55,55 +76,60 @@ namespace AccountingSystem.UI
 
         public void ArchiveCustomerFlow()
         {
-            var customer = GetCustomerName();
-            var result = _customerService.ArchiveCustomer(customer);
+            int id = GetCustomerId();
+
+            var result = _customerService.ArchiveCustomer(id);
+
             if (result == Domain.Enums.ArchiveCustomerResult.NotFound)
             {
                 Console.WriteLine("Customer is not found. Try again");
             }
             else if (result == Domain.Enums.ArchiveCustomerResult.CustomerInDebt)
             {
-                Console.WriteLine("Customer didn't pay all debts. Only customers without debt can be archived\n");
+                Console.WriteLine("Customer didn't pay all debts. Only customers without debt can be archived");
             }
             else if (result == Domain.Enums.ArchiveCustomerResult.Success)
             {
-                Console.WriteLine($"Customer has been archived and won't be longer available.");
+                Console.WriteLine("Customer has been archived.");
             }
-
         }
 
         public Customer GetCustomerInput()
         {
             Console.Write("add name of the company/client: ");
             string name = Console.ReadLine();
-            Console.Write("add zip code of the company/client: ");
+
+            Console.Write("add zip code: ");
             string zip = Console.ReadLine();
-            Console.Write("add city of the company/client: ");
+
+            Console.Write("add city: ");
             string city = Console.ReadLine();
-            Console.Write("add street of the company/client: ");
+
+            Console.Write("add street: ");
             string street = Console.ReadLine();
 
-            var address = new Domain.Entities.Address
+            Console.Write("add email address: ");
+            string email = Console.ReadLine();
+
+            var address = new Address
             {
                 ZipCode = zip,
                 City = city,
                 Street = street
             };
 
-            var customer = new Domain.Entities.Customer
+            return new Customer
             {
                 Name = name,
                 Address = address,
+                Email = email
             };
-
-            return customer;
         }
 
-        public String GetCustomerName()
+        public int GetCustomerId()
         {
-            Console.WriteLine("Type the name of the customer to search: ");
-            string searchInput = Console.ReadLine();
-            return searchInput;
+            Console.Write("Type customer ID: ");
+            return Convert.ToInt32(Console.ReadLine());
         }
     }
 }

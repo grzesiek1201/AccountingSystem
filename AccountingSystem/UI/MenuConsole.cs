@@ -1,4 +1,5 @@
 ﻿using AccountingSystem.Application.Services;
+using AccountingSystem.Application.Validation.Customers;
 using AccountingSystem.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -9,12 +10,9 @@ namespace AccountingSystem.UI
 {
     internal class MenuConsole
     {
-        
-
         public void MainMenu()
         {
             bool isActiveMainMenu = true;
-
 
             while (isActiveMainMenu)
             {
@@ -48,18 +46,16 @@ namespace AccountingSystem.UI
                     default:
                         Console.WriteLine("Invalid input. Try again");
                         break;
-
                 }
             }
-
         }
 
         public void CustomerMenu()
         {
             bool isCustomerMenuActive = true;
-            var customerService = new CustomerService();
+            var validator = new CustomerValidator();
+            var customerService = new CustomerService(validator);
             var customerUI = new CustomerUI(customerService);
-
 
             while (isCustomerMenuActive)
             {
