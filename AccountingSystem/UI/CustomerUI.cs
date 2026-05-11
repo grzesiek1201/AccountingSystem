@@ -132,20 +132,26 @@ namespace AccountingSystem.UI
             return Convert.ToInt32(Console.ReadLine());
         }
 
-        string GetCustomerErrorMessage(CustomerValidationError error)
+        private string GetCustomerErrorMessage(CustomerValidationError error)
         {
             return error switch
             {
                 CustomerValidationError.InvalidEmail => "Email format is invalid",
                 CustomerValidationError.InvalidZipCode => "Zip code is invalid",
                 CustomerValidationError.EmptyEmail => "Email is required",
+                CustomerValidationError.EmptyName => "Name is empty",
+                CustomerValidationError.NameTooLong => "Name is too long",
+                CustomerValidationError.DuplicateName => "Name is duplicated",
+                CustomerValidationError.AddressNull => "Address is empty",
+                CustomerValidationError.EmptyZipCode => "Zip code is empty",
+                CustomerValidationError.NotDigitsZipCode => "Zip code must contain only digits",
+                CustomerValidationError.EmptyCity => "City is empty",
+                CustomerValidationError.CityTooLong => "City is too long",
+                CustomerValidationError.EmailTooLong => "Email is too long",
+                CustomerValidationError.EmptyStreet => "Street is empty",
+                CustomerValidationError.StreetTooLong => "Street is too long",
                 _ => "Unknown error"
-
             };
-            foreach (var error in response.Errors)
-            {
-                Console.WriteLine(GetCustomerErrorMessage(error));
-            }
         }
     }
 }
