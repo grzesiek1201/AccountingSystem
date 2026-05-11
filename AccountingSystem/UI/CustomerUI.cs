@@ -131,5 +131,21 @@ namespace AccountingSystem.UI
             Console.Write("Type customer ID: ");
             return Convert.ToInt32(Console.ReadLine());
         }
+
+        string GetCustomerErrorMessage(CustomerValidationError error)
+        {
+            return error switch
+            {
+                CustomerValidationError.InvalidEmail => "Email format is invalid",
+                CustomerValidationError.InvalidZipCode => "Zip code is invalid",
+                CustomerValidationError.EmptyEmail => "Email is required",
+                _ => "Unknown error"
+
+            };
+            foreach (var error in response.Errors)
+            {
+                Console.WriteLine(GetCustomerErrorMessage(error));
+            }
+        }
     }
 }
