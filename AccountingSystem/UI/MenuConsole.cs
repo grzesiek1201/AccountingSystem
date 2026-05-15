@@ -67,7 +67,7 @@ namespace AccountingSystem.UI
             while (isCustomerMenuActive)
             {
                 Console.WriteLine("CUSTOMER MENU");
-                Console.WriteLine("1- to add client, 2- to edit client, 3- to show all clients name, 4- to search a client by name or ID, r - to return to main menu");
+                Console.WriteLine("1- to add client, 2- to edit client, 3- to show all clients name, 4- to search a client by name or ID, 5- to archive client, r - to return to main menu");
                 Console.Write("Type your option: ");
                 string inputChoiceMenu = Console.ReadLine();
                 switch (inputChoiceMenu.Trim().ToLower())
@@ -100,7 +100,7 @@ namespace AccountingSystem.UI
 
                     case "5":
                         {
-                            customerUI.FindCustomerFlow();
+                            customerUI.ArchiveCustomerFlow();
                         }
                         break;
 
@@ -119,7 +119,7 @@ namespace AccountingSystem.UI
         public void ProductMenu()
         {
             Console.WriteLine("PRODUCT MENU");
-            Console.WriteLine("1- to add product, 2- to edit prodcut, 3- to delete product,4- to search product by ID, 5- to show all products, r- to return to main menu");
+            Console.WriteLine("1- to add product, 2- to edit prodcut, 3- to archive product,4- to search product by ID, 5- to show all products, r- to return to main menu");
             Console.Write("Type your option: ");
             string inputChoiceProduct = Console.ReadLine();
             switch (inputChoiceProduct.Trim().ToLower())

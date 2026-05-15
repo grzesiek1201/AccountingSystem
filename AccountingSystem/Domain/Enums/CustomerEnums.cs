@@ -24,6 +24,7 @@
     public enum ValidateResult
     {
        IsValid,
+       NotValid
         
     }
 

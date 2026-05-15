@@ -13,5 +13,32 @@ namespace AccountingSystem.UI
         {
             _productService = productService;
         }
+
+        public void AddProductFlow()
+        {
+
+        }
+
+        public void EditProductFlow()
+        {
+
+        }
+
+        public void ArchiveProductFlow()
+        {
+
+        }
+
+        public void FindProductFlow()
+        {
+
+        }
+
+        public void GetAllProductsFlow()
+        {
+
+        }
+
+
     }
 }
