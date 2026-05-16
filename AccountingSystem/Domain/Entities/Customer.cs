@@ -11,7 +11,7 @@ namespace AccountingSystem.Domain.Entities
         public string Email { get; set; }
         public Address Address { get; set; }
         public Wallet Wallet { get; set; } = new Wallet();
-        public bool IsArchived { get; set; }
+        public bool IsCustomerArchived { get; set; }
     }
 
     public class Address

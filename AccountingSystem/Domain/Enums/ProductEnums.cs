@@ -24,7 +24,7 @@ namespace AccountingSystem.Domain.Enums
         NotFound,
     }
 
-    public enum ValidateResult
+    public enum ValidateProductResult
     {
         IsValid,
         NotValid

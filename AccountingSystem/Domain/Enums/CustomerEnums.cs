@@ -21,7 +21,7 @@
         CustomerInDebt
     } 
 
-    public enum ValidateResult
+    public enum ValidateCustomerResult
     {
        IsValid,
        NotValid

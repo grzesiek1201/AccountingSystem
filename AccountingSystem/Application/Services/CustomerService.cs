@@ -49,7 +49,7 @@ namespace AccountingSystem.Application.Services
             if (existing == null)
                 return Domain.Enums.CustomerEditResult.NotFound;
 
-            if (existing.IsArchived)
+            if (existing.IsCustomerArchived)
                 return Domain.Enums.CustomerEditResult.CustomerArchived;
 
             var otherCustomers = customers.Where(x => x.Id != customer.Id).ToList();
@@ -95,7 +95,7 @@ namespace AccountingSystem.Application.Services
             {
                 return Domain.Enums.ArchiveCustomerResult.CustomerInDebt;
             }
-            existing.IsArchived = true;
+            existing.IsCustomerArchived = true;
             return Domain.Enums.ArchiveCustomerResult.Success;
         }
     }

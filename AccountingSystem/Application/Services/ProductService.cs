@@ -1,5 +1,4 @@
 ﻿using AccountingSystem.Application.DTOs;
-using AccountingSystem.Application.Validation.Customers;
 using AccountingSystem.Application.Validation.Products;
 using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
@@ -52,7 +51,7 @@ namespace AccountingSystem.Application.Services
             if (existing == null)
                 return Domain.Enums.ProductEditResult.NotFound;
 
-            if (existing.IsArchived)
+            if (existing.IsProductArchived)
                 return Domain.Enums.ProductEditResult.ProductArchived;
 
             var otherProducts = product.Where(x => x.Id != product.Id).ToList();
@@ -62,15 +61,39 @@ namespace AccountingSystem.Application.Services
                 return Domain.Enums.ProductEditResult.InvalidData;
 
             existing.Name = product.Name;
-            existing.Address = product.Address;
-            existing.Email = customer.Email;
+            existing.Price = product.Price;
+            existing.Category = product.Category;
 
-            return Domain.Enums.CustomerEditResult.Success;
+            return Domain.Enums.ProductEditResult.Success;
         }
 
-        public List<Customer> GetAllCustomers()
+        public List<Product> GetAllProducts()
         {
-            return customers;
+            return products;
+        }
+
+        public Product FindProduct(int Id)
+        {
+            var existing = products.Find(x => x.Id == Id);
+            if (existing != null)
+            {
+                return existing;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public Domain.Enums.ArchiveProductResult ArchiveProduct(int Id)
+        {
+            var existing = products.Find(x => x.Id == Id);
+            if (existing == null)
+            {
+                return Domain.Enums.ArchiveProductResult.NotFound;
+            }
+            existing.IsArchived = true;
+            return Domain.Enums.ArchiveProductResult.Success;
         }
     }
 }

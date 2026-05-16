@@ -118,34 +118,48 @@ namespace AccountingSystem.UI
 
         public void ProductMenu()
         {
-            Console.WriteLine("PRODUCT MENU");
-            Console.WriteLine("1- to add product, 2- to edit prodcut, 3- to archive product,4- to search product by ID, 5- to show all products, r- to return to main menu");
-            Console.Write("Type your option: ");
-            string inputChoiceProduct = Console.ReadLine();
-            switch (inputChoiceProduct.Trim().ToLower())
+            bool isProductMenuActive = true;
+            var validator = new ProductValidator();
+            var productService = new ProductService(validator);
+            var productUI = new ProductUI(productService);
+            while (isProductMenuActive)
             {
-                case "1":
+                Console.WriteLine("PRODUCT MENU");
+                Console.WriteLine("1- to add product, 2- to edit prodcut, 3- to archive product,4- to search product by ID, 5- to show all products, r- to return to main menu");
+                Console.Write("Type your option: ");
+                string inputChoiceProduct = Console.ReadLine();
+                switch (inputChoiceProduct.Trim().ToLower())
+                {
+                    case "1":
+                        productUI.AddProductFlow();
+                        break;
 
-                    break;
-                case "2":
+                    case "2":
+                        productUI.EditProductFlow();
+                        break;
 
-                    break;
-                case "3":
+                    case "3":
+                        productUI.ArchiveProductFlow();
+                        break;
 
-                    break;
-                case "4":
+                    case "4":
+                        productUI.FindProductFlow();
+                        break;
 
-                    break;
-                case "5":
+                    case "5":
+                        productUI.GetAllProductsFlow();
+                        break;
 
-                    break;
-                case "r":
+                    case "r":
+                        isProductMenuActive = false;
+                        break;
 
-                    break;
-                default:
-                    Console.WriteLine("Invalid input. Try again");
-                    break;
+                    default:
+                        Console.WriteLine("Invalid input. Try again");
+                        break;
+                }
             }
+            
         }
         public void InvoiceMenu()
         {
