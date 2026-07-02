@@ -1,4 +1,6 @@
-﻿using AccountingSystem.Application.Interfaces;
+﻿using AccountingSystem.Application.DTOs.Invoices;
+using AccountingSystem.Application.DTOs.Payments;
+using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Repositories;
 using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
@@ -6,110 +8,113 @@ using Microsoft.Extensions.Logging;
 
 namespace AccountingSystem.Application.Services
 {
-    public class PaymentService
+    public class PaymentService : IPaymentService
     {
         private readonly IPaymentRepository _paymentRepository;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly InvoiceService _invoiceService;
         private readonly ILogger<PaymentService> _logger;
+        private readonly IInvoiceStatusCalculator _statusCalculator;
 
         public PaymentService(
             IPaymentRepository paymentRepository,
             IInvoiceRepository invoiceRepository,
             IUnitOfWork unitOfWork,
-            InvoiceService invoiceService,
-            ILogger<PaymentService> logger)
+            ILogger<PaymentService> logger,
+            IInvoiceStatusCalculator statusCalculator)
         {
             _paymentRepository = paymentRepository;
             _invoiceRepository = invoiceRepository;
             _unitOfWork = unitOfWork;
-            _invoiceService = invoiceService;
             _logger = logger;
+            _statusCalculator = statusCalculator;
         }
 
-        public PaymentAddResult AddPayment(int invoiceId, Payment payment)
-        {
-            _logger.LogInformation("Starting AddPayment. InvoiceId: {InvoiceId}, Amount: {Amount}",
-                invoiceId, payment.Amount);
+        // ================= CREATE =================
 
-            var invoice = _invoiceRepository.GetById(invoiceId);
+        public PaymentAddResponse AddPayment(CreatePaymentRequest request)
+        {
+            _logger.LogInformation(
+                "AddPayment InvoiceId={InvoiceId}, Amount={Amount}",
+                request.InvoiceId,
+                request.Amount);
+
+            var invoice = _invoiceRepository.GetById(request.InvoiceId);
 
             if (invoice == null)
-            {
-                _logger.LogWarning("Invoice not found. Id: {InvoiceId}", invoiceId);
-                return PaymentAddResult.InvoiceNotFound;
-            }
+                return new PaymentAddResponse { Result = PaymentAddResult.InvoiceNotFound };
 
             if (invoice.IsInvoiceArchived)
-            {
-                _logger.LogWarning("Invoice archived. Id: {InvoiceId}", invoiceId);
-                return PaymentAddResult.InvoiceArchived;
-            }
+                return new PaymentAddResponse { Result = PaymentAddResult.InvoiceArchived };
 
-            if (payment.Amount <= 0)
-            {
-                _logger.LogWarning("Invalid payment amount: {Amount}", payment.Amount);
-                return PaymentAddResult.InvalidAmount;
-            }
+            if (request.Amount <= 0)
+                return new PaymentAddResponse { Result = PaymentAddResult.InvalidAmount };
 
-            var alreadyPaid = invoice.Payments.Sum(p => p.Amount);
+            var alreadyPaid = _paymentRepository.GetTotalPaidForInvoice(request.InvoiceId);
             var remaining = invoice.TotalAmount - alreadyPaid;
 
-            if (payment.Amount > remaining)
+            if (request.Amount > remaining)
+                return new PaymentAddResponse { Result = PaymentAddResult.AmountExceedsRemaining };
+
+            var payment = new Payment
             {
-                _logger.LogWarning("Payment exceeds remaining. Remaining: {Remaining}, Amount: {Amount}",
-                    remaining, payment.Amount);
-
-                return PaymentAddResult.AmountExceedsRemaining;
-            }
-
-            payment.InvoiceId = invoiceId;
-            payment.PaymentDate = DateTime.Now;
-            payment.Status = PaymentStatus.Completed;
+                InvoiceId = request.InvoiceId,
+                Amount = request.Amount,
+                PaymentDate = DateTime.UtcNow,
+                Status = PaymentStatus.Paid
+            };
 
             _paymentRepository.Add(payment);
-            invoice.Payments.Add(payment);
 
-            _invoiceService.RecalculateInvoiceStatus(invoice);
+            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(request.InvoiceId);
+            _statusCalculator.Recalculate(invoice, totalPaid);
 
             _unitOfWork.Save();
 
-            _logger.LogInformation("Payment added successfully. InvoiceId: {InvoiceId}", invoiceId);
-
-            return PaymentAddResult.Success;
+            return new PaymentAddResponse
+            {
+                Result = PaymentAddResult.Success
+            };
         }
 
-        public IQueryable<Payment> GetPaymentsForInvoice(int invoiceId)
-        {
-            _logger.LogInformation("Fetching payments for invoice. Id: {InvoiceId}", invoiceId);
+        // ================= GET =================
 
+        public IEnumerable<PaymentResponse> GetPaymentsForInvoice(int invoiceId)
+        {
             return _paymentRepository
                 .GetByInvoiceId(invoiceId)
-                .AsQueryable();
+                .Select(p => new PaymentResponse
+                {
+                    Id = p.Id,
+                    Amount = p.Amount,
+                    PaymentDate = p.PaymentDate,
+                    Status = p.Status,
+                    InvoiceId = p.InvoiceId
+                });
         }
 
-        public void DeletePayment(int paymentId)
-        {
-            _logger.LogInformation("Deleting payment. Id: {PaymentId}", paymentId);
+        // ================= DELETE =================
 
+        public PaymentDeleteResult DeletePayment(int paymentId)
+        {
             var payment = _paymentRepository.GetById(paymentId);
 
             if (payment == null)
-            {
-                _logger.LogWarning("Payment not found. Id: {PaymentId}", paymentId);
-                return;
-            }
+                return PaymentDeleteResult.NotFound;
 
             var invoice = _invoiceRepository.GetById(payment.InvoiceId);
 
+            if (invoice == null)
+                return PaymentDeleteResult.NotFound;
+
             _paymentRepository.Delete(payment);
 
-            _invoiceService.RecalculateInvoiceStatus(invoice);
+            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(payment.InvoiceId);
+            _statusCalculator.Recalculate(invoice, totalPaid);
 
             _unitOfWork.Save();
 
-            _logger.LogInformation("Payment deleted successfully. Id: {PaymentId}", paymentId);
+            return PaymentDeleteResult.Success;
         }
     }
 }

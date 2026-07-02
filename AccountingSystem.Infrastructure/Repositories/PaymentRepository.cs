@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using AccountingSystem.Application.Repositories;
+﻿using AccountingSystem.Application.Repositories;
 using AccountingSystem.Domain.Entities;
 
 namespace AccountingSystem.Infrastructure.Repositories
@@ -11,7 +9,10 @@ namespace AccountingSystem.Infrastructure.Repositories
 
         public void Add(Payment payment)
         {
-            payment.Id = _payments.Count > 0 ? _payments.Max(p => p.Id) + 1 : 1;
+            payment.Id = _payments.Count > 0
+                ? _payments.Max(p => p.Id) + 1
+                : 1;
+
             _payments.Add(payment);
         }
 
@@ -27,7 +28,16 @@ namespace AccountingSystem.Infrastructure.Repositories
 
         public List<Payment> GetByInvoiceId(int invoiceId)
         {
-            return _payments.Where(p => p.Invoice.Id == invoiceId).ToList();
+            return _payments
+                .Where(p => p.InvoiceId == invoiceId)
+                .ToList();
+        }
+
+        public decimal GetTotalPaidForInvoice(int invoiceId)
+        {
+            return _payments
+                .Where(p => p.InvoiceId == invoiceId)
+                .Sum(p => p.Amount);
         }
 
         public void Delete(Payment payment)
