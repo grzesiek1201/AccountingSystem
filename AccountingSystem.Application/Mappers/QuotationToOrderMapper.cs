@@ -1,6 +1,4 @@
 ﻿using AccountingSystem.Domain.Entities;
-using AccountingSystem.Domain.Enums;
-using System.Linq;
 
 namespace AccountingSystem.Application.Mappers
 {
@@ -11,15 +9,15 @@ namespace AccountingSystem.Application.Mappers
             if (quotation == null)
                 return null;
 
-            var order = new Order
+            return new Order
             {
                 CustomerId = quotation.CustomerId,
                 CustomerName = quotation.CustomerName,
                 CustomerStreet = quotation.CustomerStreet,
                 CustomerZipCode = quotation.CustomerZipCode,
-                DateCreated = DateTime.Now,
-                Status = OrderStatus.Draft,
+
                 QuotationId = quotation.Id,
+
                 Items = quotation.Items.Select(q => new OrderItem
                 {
                     ProductId = q.ProductId,
@@ -29,8 +27,6 @@ namespace AccountingSystem.Application.Mappers
                     Position = q.Position
                 }).ToList()
             };
-
-            return order;
         }
     }
 }

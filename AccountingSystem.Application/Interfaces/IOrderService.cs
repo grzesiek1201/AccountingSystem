@@ -8,6 +8,7 @@ namespace AccountingSystem.Application.Interfaces
         OrderAddResponse AddOrder(CreateOrderRequest request);
         OrderEditResponse EditOrder(UpdateOrderRequest request);
         List<OrderResponse> GetAllOrders();
+        OrderResponse? FindOrder(int id);
         OrderStatusResponse ChangeOrderStatus(int id, StatusOrderRequest request);
         ArchiveOrderResult ArchiveOrder(int id);
     }

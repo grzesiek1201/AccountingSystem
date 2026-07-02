@@ -1,5 +1,4 @@
 ﻿using AccountingSystem.Domain.Entities;
-using AccountingSystem.Domain.Enums;
 
 namespace AccountingSystem.Application.Mappers
 {
@@ -16,11 +15,9 @@ namespace AccountingSystem.Application.Mappers
                 CustomerName = order.CustomerName,
                 CustomerStreet = order.CustomerStreet,
                 CustomerZipCode = order.CustomerZipCode,
-                DateCreated = DateTime.Now,
-                IssueDate = DateTime.Now,
-                DueDate = DateTime.Now.AddDays(14),
-                Status = InvoiceStatus.Draft,
+                
                 OrderId = order.Id,
+
                 Items = order.Items.Select(q => new InvoiceItem
                 {
                     ProductId = q.ProductId,

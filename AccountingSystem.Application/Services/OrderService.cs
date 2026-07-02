@@ -1,12 +1,12 @@
 using AccountingSystem.Application.DTOs.Orders;
 using AccountingSystem.Application.Helpers.Snapshots;
 using AccountingSystem.Application.Interfaces;
+using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
 using AccountingSystem.Application.Validation.Orders;
 using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using AccountingSystem.Application.Mappers;
 
 namespace AccountingSystem.Application.Services
 {
@@ -20,6 +20,8 @@ namespace AccountingSystem.Application.Services
         private readonly ICustomerRepository _customerRepository;
         private readonly IProductRepository _productRepository;
         private readonly OrderResponseMapper _mapper;
+        private readonly IQuotationRepository _quotationRepository;
+        private readonly QuotationToOrderMapper _quotationToOrderMapper;
 
         public OrderService(
             IOrderRepository orderRepository,
@@ -29,7 +31,9 @@ namespace AccountingSystem.Application.Services
             INumberSequenceService numberSequenceService,
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
-            OrderResponseMapper mapper)
+            OrderResponseMapper mapper,
+            IQuotationRepository quotationRepository,
+            QuotationToOrderMapper quotationToOrderMapper)
         {
             _orderRepository = orderRepository;
             _validator = validator;
@@ -39,6 +43,8 @@ namespace AccountingSystem.Application.Services
             _customerRepository = customerRepository;
             _productRepository = productRepository;
             _mapper = mapper;
+            _quotationRepository = quotationRepository;
+            _quotationToOrderMapper = quotationToOrderMapper;
         }
 
         // ================= ADD =================
@@ -106,6 +112,40 @@ namespace AccountingSystem.Application.Services
             {
                 Result = OrderAddResult.Success
             };
+        }
+
+        // ================= CONVERT QUOTATION TO ORDER =================
+        public OrderAddResponse CreateOrderFromQuotation(int quotationId)
+        {
+            _logger.LogInformation("CreateOrderFromQuotation start. QuotationId: {QuotationId}", quotationId);
+
+            var quotation = _quotationRepository.GetById(quotationId);
+
+            if (quotation == null || quotation.IsQuotationArchived)
+                return new OrderAddResponse { Result = OrderAddResult.InvalidData };
+
+            var order = _quotationToOrderMapper.Map(quotation);
+
+            if (order == null)
+                return new OrderAddResponse { Result = OrderAddResult.InvalidData };
+
+            order.OrderNumber = _numberSequenceService.GetNext(DocumentType.Order);
+            order.Status = OrderStatus.Draft;
+            order.DateCreated = DateTime.UtcNow;
+
+            var validation = _validator.Validate(order, _orderRepository.GetAll());
+
+            if (!validation.IsValid)
+                return new OrderAddResponse
+                {
+                    Result = OrderAddResult.InvalidData,
+                    Errors = validation.Errors
+                };
+
+            _orderRepository.Add(order);
+            _unitOfWork.Save();
+
+            return new OrderAddResponse { Result = OrderAddResult.Success };
         }
 
         // ================= EDIT =================
