@@ -4,10 +4,8 @@ namespace AccountingSystem.Domain.Enums
     {
         Draft,
         Issued,
-        PartiallyPaid,
-        Paid,
+        Archived,
         Overdue,
-        Unpaid,
         Cancelled
     }
 }
