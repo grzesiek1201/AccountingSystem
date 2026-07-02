@@ -1,8 +1,5 @@
 ﻿using AccountingSystem.Application.DTOs.Invoices;
-using AccountingSystem.Application.DTOs.Orders;
-using AccountingSystem.Application.Mappers;
-using AccountingSystem.Application.Services;
-using AccountingSystem.Domain.Entities;
+using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,20 +9,18 @@ namespace AccountingSystem.API.Controllers
     [Route("api/invoices")]
     public class InvoiceController : ControllerBase
     {
-        private readonly InvoiceService _invoiceService;
-        private readonly InvoiceResponseMapper _mapper;
+        private readonly IInvoiceService _invoiceService;
         private readonly ILogger<InvoiceController> _logger;
 
         public InvoiceController(
-            InvoiceService invoiceService,
-            InvoiceResponseMapper mapper,
+            IInvoiceService invoiceService,
             ILogger<InvoiceController> logger)
         {
             _invoiceService = invoiceService;
-            _mapper = mapper;
             _logger = logger;
         }
 
+        // ================= GET ALL =================
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -33,11 +28,10 @@ namespace AccountingSystem.API.Controllers
 
             var invoices = _invoiceService.GetAllInvoices();
 
-            _logger.LogInformation("Found {Count} invoices", invoices.Count);
-
-            return Ok(invoices.Select(_mapper.Map));
+            return Ok(invoices);
         }
 
+        // ================= GET BY ID =================
         [HttpGet("{id}")]
         public IActionResult Find(int id)
         {
@@ -46,36 +40,18 @@ namespace AccountingSystem.API.Controllers
             var invoice = _invoiceService.FindInvoice(id);
 
             if (invoice == null)
-            {
-                _logger.LogWarning("Invoice not found: {Id}", id);
                 return NotFound();
-            }
 
-            return Ok(_mapper.Map(invoice));
+            return Ok(invoice);
         }
 
+        // ================= CREATE =================
         [HttpPost]
         public IActionResult Create(CreateInvoiceRequest request)
         {
             _logger.LogInformation("POST /api/invoices CustomerId={CustomerId}", request.CustomerId);
 
-            var invoice = new Invoice
-            {
-                CustomerId = request.CustomerId,
-                DateCreated = DateTime.UtcNow,
-                Status = InvoiceStatus.Draft,
-                IssueDate = request.IssueDate,
-                DueDate = request.DueDate,
-                Items = request.Items.Select(i => new InvoiceItem
-                {
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent,
-                    Position = i.Position
-                }).ToList()
-            };
-
-            var result = _invoiceService.AddInvoice(invoice);
+            var result = _invoiceService.AddInvoice(request);
 
             if (!result.IsSuccess)
             {
@@ -83,30 +59,18 @@ namespace AccountingSystem.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            _logger.LogInformation("Invoice created: {Id}", invoice.Id);
-
-            return Ok(_mapper.Map(invoice));
+            return Ok(result);
         }
 
+        // ================= UPDATE =================
         [HttpPut("{id}")]
         public IActionResult Update(int id, UpdateInvoiceRequest request)
         {
             _logger.LogInformation("PUT /api/invoices/{Id}", id);
 
-            var invoice = new Invoice
-            {
-                Id = id,
-                CustomerId = request.CustomerId,
-                Items = request.Items.Select(i => new InvoiceItem
-                {
-                    Id = i.Id ?? 0,
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent
-                }).ToList()
-            };
+            request.Id = id;
 
-            var result = _invoiceService.EditInvoice(invoice);
+            var result = _invoiceService.EditInvoice(request);
 
             if (!result.IsSuccess)
             {
@@ -116,11 +80,13 @@ namespace AccountingSystem.API.Controllers
 
             var updated = _invoiceService.FindInvoice(id);
 
-            _logger.LogInformation("Invoice updated: {Id}", id);
+            if (updated == null)
+                return NotFound();
 
-            return Ok(_mapper.Map(updated));
+            return Ok(updated);
         }
 
+        // ================= ARCHIVE =================
         [HttpPatch("{id}/archive")]
         public IActionResult Archive(int id)
         {
@@ -129,12 +95,7 @@ namespace AccountingSystem.API.Controllers
             var result = _invoiceService.ArchiveInvoice(id);
 
             if (result == ArchiveInvoiceResult.NotFound)
-            {
-                _logger.LogWarning("Archive failed, not found: {Id}", id);
                 return NotFound();
-            }
-
-            _logger.LogInformation("Invoice archived: {Id}", id);
 
             return NoContent();
         }

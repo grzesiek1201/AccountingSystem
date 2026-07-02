@@ -1,7 +1,5 @@
 ﻿using AccountingSystem.Application.DTOs.Orders;
-using AccountingSystem.Application.Mappers;
-using AccountingSystem.Application.Services;
-using AccountingSystem.Domain.Entities;
+using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,24 +7,20 @@ namespace AccountingSystem.API.Controllers
 {
     [ApiController]
     [Route("api/orders")]
-
-
     public class OrderController : ControllerBase
     {
-        private readonly OrderService _orderService;
-        private readonly OrderResponseMapper _mapper;
+        private readonly IOrderService _orderService;
         private readonly ILogger<OrderController> _logger;
 
         public OrderController(
-            OrderService orderService,
-            OrderResponseMapper mapper,
+            IOrderService orderService,
             ILogger<OrderController> logger)
         {
             _orderService = orderService;
-            _mapper = mapper;
             _logger = logger;
         }
 
+        // ================= GET ALL =================
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -34,11 +28,10 @@ namespace AccountingSystem.API.Controllers
 
             var orders = _orderService.GetAllOrders();
 
-            _logger.LogInformation("Found {Count} orders", orders.Count);
-
-            return Ok(orders.Select(_mapper.Map));
+            return Ok(orders);
         }
 
+        // ================= GET BY ID =================
         [HttpGet("{id}")]
         public IActionResult Find(int id)
         {
@@ -47,34 +40,18 @@ namespace AccountingSystem.API.Controllers
             var order = _orderService.FindOrder(id);
 
             if (order == null)
-            {
-                _logger.LogWarning("Order not found: {Id}", id);
                 return NotFound();
-            }
 
-            return Ok(_mapper.Map(order));
+            return Ok(order);
         }
 
+        // ================= CREATE =================
         [HttpPost]
         public IActionResult Create(CreateOrderRequest request)
         {
             _logger.LogInformation("POST /api/orders CustomerId={CustomerId}", request.CustomerId);
 
-            var order = new Order
-            {
-                CustomerId = request.CustomerId,
-                DateCreated = DateTime.UtcNow,
-                Status = OrderStatus.Draft,
-                Items = request.Items.Select(o => new OrderItem
-                {
-                    ProductId = o.ProductId,
-                    Quantity = o.Quantity,
-                    DiscountPercent = o.DiscountPercent,
-                    Position = o.Position
-                }).ToList()
-            };
-
-            var result = _orderService.AddOrder(order);
+            var result = _orderService.AddOrder(request);
 
             if (!result.IsSuccess)
             {
@@ -82,30 +59,18 @@ namespace AccountingSystem.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            _logger.LogInformation("Order created: {Id}", order.Id);
-
-            return Ok(_mapper.Map(order));
+            return Ok(result);
         }
 
+        // ================= UPDATE =================
         [HttpPut("{id}")]
         public IActionResult Update(int id, UpdateOrderRequest request)
         {
             _logger.LogInformation("PUT /api/orders/{Id}", id);
 
-            var order = new Order
-            {
-                Id = id,
-                CustomerId = request.CustomerId,
-                Items = request.Items.Select(i => new OrderItem
-                {
-                    Id = i.Id ?? 0,
-                    ProductId = i.ProductId,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent
-                }).ToList()
-            };
+            request.Id = id;
 
-            var result = _orderService.EditOrder(order);
+            var result = _orderService.EditOrder(request);
 
             if (!result.IsSuccess)
             {
@@ -115,11 +80,13 @@ namespace AccountingSystem.API.Controllers
 
             var updated = _orderService.FindOrder(id);
 
-            _logger.LogInformation("Order updated: {Id}", id);
+            if (updated == null)
+                return NotFound();
 
-            return Ok(_mapper.Map(updated));
+            return Ok(updated);
         }
 
+        // ================= ARCHIVE =================
         [HttpPatch("{id}/archive")]
         public IActionResult Archive(int id)
         {
@@ -128,14 +95,9 @@ namespace AccountingSystem.API.Controllers
             var result = _orderService.ArchiveOrder(id);
 
             if (result == ArchiveOrderResult.NotFound)
-            {
-                _logger.LogWarning("Archive failed, not found: {Id}", id);
                 return NotFound();
-            }
-
-            _logger.LogInformation("Order archived: {Id}", id);
 
             return NoContent();
         }
     }
-}   
+}
