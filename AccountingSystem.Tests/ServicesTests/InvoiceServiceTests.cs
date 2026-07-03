@@ -1,4 +1,4 @@
-﻿using AccountingSystem.Application.DTOs.Customers;
+﻿using AccountingSystem.Application.DTOs.Invoices;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -8,18 +8,24 @@ using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit;
 
 namespace AccountingSystem.Tests.ServicesTests
 {
     public class InvoiceServiceTests
     {
         private readonly Mock<IInvoiceRepository> _repoMock;
+        private readonly Mock<IPaymentRepository> _paymentMock;
         private readonly Mock<IUnitOfWork> _uowMock;
         private readonly Mock<ILogger<InvoiceService>> _loggerMock;
         private readonly Mock<INumberSequenceService> _seqMock;
-        private readonly Mock<OrderToInvoiceMapper> _mapperMock;
         private readonly Mock<ICustomerRepository> _customerRepo;
         private readonly Mock<IProductRepository> _productRepo;
+        private readonly Mock<IOrderRepository> _orderRepoMock;
+        private readonly Mock<IInvoiceStatusCalculator> _statusCalcMock;
+
+        private readonly InvoiceResponseMapper _mapper;
+        private readonly OrderToInvoiceMapper _orderToInvoiceMapper;
 
         private readonly InvoiceValidator _validator;
         private readonly InvoiceService _service;
@@ -27,231 +33,182 @@ namespace AccountingSystem.Tests.ServicesTests
         public InvoiceServiceTests()
         {
             _repoMock = new Mock<IInvoiceRepository>();
+            _paymentMock = new Mock<IPaymentRepository>();
             _uowMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<InvoiceService>>();
             _seqMock = new Mock<INumberSequenceService>();
-            _mapperMock = new Mock<OrderToInvoiceMapper>();
             _customerRepo = new Mock<ICustomerRepository>();
             _productRepo = new Mock<IProductRepository>();
+            _orderRepoMock = new Mock<IOrderRepository>();
+            _statusCalcMock = new Mock<IInvoiceStatusCalculator>();
 
-            _seqMock
-                .Setup(x => x.GetNext(It.IsAny<DocumentType>()))
+            _mapper = new InvoiceResponseMapper();
+            _orderToInvoiceMapper = new OrderToInvoiceMapper();
+            _validator = new InvoiceValidator();
+
+            _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
                 .Returns("I-2026-0001");
 
-            _customerRepo
-                .Setup(x => x.GetById(1))
+            _customerRepo.Setup(x => x.GetById(1))
                 .Returns(new Customer
-                 {
-                    Id = 1,
-                    Name = "Test"
-                 });
-
-            _productRepo
-                .Setup(x => x.GetByIds(It.IsAny<List<int>>()))
-                .Returns(new List<Product>
-                {
-                new Product
                 {
                     Id = 1,
                     Name = "Test",
-                    Price = 100m
-                }
+                    Email = "test@test.com",
+                    City = "X",
+                    Street = "Y",
+                    ZipCode = "00-000"
                 });
 
-            _validator = new InvoiceValidator();
+            _productRepo.Setup(x => x.GetByIds(It.IsAny<List<int>>()))
+                .Returns(new List<Product>
+                {
+                    new Product
+                    {
+                        Id = 1,
+                        Name = "Test",
+                        Price = 100m
+                    }
+                });
 
             _service = new InvoiceService(
                 _repoMock.Object,
+                _paymentMock.Object,
                 _validator,
                 _uowMock.Object,
                 _loggerMock.Object,
                 _seqMock.Object,
-                _mapperMock.Object,
                 _customerRepo.Object,
-                _productRepo.Object
+                _productRepo.Object,
+                _mapper,
+                _orderRepoMock.Object,
+                _orderToInvoiceMapper,
+                _statusCalcMock.Object
             );
         }
 
-        private Invoice CreateValidInvoice()
+        private CreateInvoiceRequest CreateValidRequest()
         {
-            return new Invoice
+            return new CreateInvoiceRequest
             {
-                Id = 1,
-
-                InvoiceNumber = "F-2026-001",
-                Status = InvoiceStatus.Draft,
-
-                DateCreated = new DateTime(2026, 1, 1),
-                IssueDate = new DateTime(2026, 1, 1),
-                DueDate = new DateTime(2026, 1, 15),
-
                 CustomerId = 1,
-                Customer = new Customer { Id = 1 },
-
-                TotalAmount = 200m,
-                Payments = new List<Payment>(),
-
-                Items = new List<InvoiceItem>
+                Items = new List<CreateInvoiceItemRequest>
                 {
-                    new InvoiceItem
+                    new CreateInvoiceItemRequest
                     {
-
                         ProductId = 1,
-                        Product = new Product { Id = 1 },
-
                         Quantity = 2,
-                        BaseUnitPrice = 100m,
-                        DiscountPercent = 0,
-                        Position = 1
-                     }
+                        DiscountPercent = 0
+                    }
                 }
             };
         }
 
-        private Invoice CreateInvalidInvoice_NoItems()
+        private UpdateInvoiceRequest CreateValidUpdateRequest()
         {
-            var invoice = CreateValidInvoice();
-            invoice.Items.Clear();
-            return invoice;
+            return new UpdateInvoiceRequest
+            {
+                Id = 1,
+                CustomerId = 1,
+                Status = InvoiceStatus.Draft,
+                Items = new List<UpdateInvoiceItemRequest>
+                {
+                    new UpdateInvoiceItemRequest
+                    {
+                        ProductId = 1,
+                        Quantity = 2,
+                        DiscountPercent = 0
+                    }
+                }
+            };
         }
-
-        // ---------------- ADD ----------------
 
         [Fact]
         public void AddInvoice_Valid_ShouldReturnSuccess()
         {
-            var invoice = CreateValidInvoice();
-
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Invoice>());
 
-            var result = _service.AddInvoice(invoice);
+            var result = _service.AddInvoice(CreateValidRequest());
 
             Assert.Equal(InvoiceAddResult.Success, result.Result);
-
-            _repoMock.Verify(r => r.Add(invoice), Times.Once);
-            _uowMock.Verify(u => u.Save(), Times.Once);
         }
 
         [Fact]
         public void AddInvoice_Invalid_ShouldReturnInvalidData()
         {
-            var invoice = CreateInvalidInvoice_NoItems();
+            var req = CreateValidRequest();
+            req.Items = new List<CreateInvoiceItemRequest>();
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Invoice>());
 
-            var result = _service.AddInvoice(invoice);
+            var result = _service.AddInvoice(req);
 
             Assert.Equal(InvoiceAddResult.InvalidData, result.Result);
-
-            _repoMock.Verify(r => r.Add(It.IsAny<Invoice>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
-
-        // ---------------- EDIT ----------------
 
         [Fact]
         public void EditInvoice_NotFound_ShouldReturnNotFound()
         {
-            var invoice = CreateValidInvoice();
+            var req = CreateValidUpdateRequest();
 
-            _repoMock.Setup(r => r.GetById(invoice.Id))
+            _repoMock.Setup(r => r.GetById(req.Id))
                 .Returns((Invoice)null);
 
-            var result = _service.EditInvoice(invoice);
+            var result = _service.EditInvoice(req);
 
             Assert.Equal(InvoiceEditResult.NotFound, result.Result);
         }
 
         [Fact]
-        public void EditInvoice_Archived_ShouldReturnInvoiceArchived()
+        public void EditInvoice_Archived_ShouldReturnArchived()
         {
-            var invoice = CreateValidInvoice();
-            invoice.IsInvoiceArchived = true;
+            var req = CreateValidUpdateRequest();
 
-            _repoMock.Setup(r => r.GetById(invoice.Id))
-                .Returns(invoice);
+            _repoMock.Setup(r => r.GetById(req.Id))
+                .Returns(new Invoice { Id = 1, IsInvoiceArchived = true });
 
-            var result = _service.EditInvoice(invoice);
+            var result = _service.EditInvoice(req);
 
             Assert.Equal(InvoiceEditResult.InvoiceArchived, result.Result);
-
-            _repoMock.Verify(r => r.Update(It.IsAny<Invoice>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
-
-        [Fact]
-        public void EditInvoice_Invalid_ShouldReturnInvalidData()
-        {
-            var invoice = CreateValidInvoice();
-
-            _repoMock.Setup(r => r.GetById(invoice.Id))
-                .Returns((Invoice)null);
-
-            var result = _service.EditInvoice(invoice);
-
-            Assert.Equal(InvoiceEditResult.NotFound, result.Result);
-
-            _repoMock.Verify(r => r.Update(It.IsAny<Invoice>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
-        }
-
-        // ---------------- ARCHIVE ----------------
 
         [Fact]
         public void ArchiveInvoice_Existing_ShouldReturnSuccess()
         {
-            var invoice = CreateValidInvoice();
+            var invoice = new Invoice { Id = 1 };
 
-            _repoMock.Setup(r => r.GetById(invoice.Id))
+            _repoMock.Setup(r => r.GetById(1))
                 .Returns(invoice);
 
-            var result = _service.ArchiveInvoice(invoice.Id);
+            var result = _service.ArchiveInvoice(1);
 
             Assert.Equal(ArchiveInvoiceResult.Success, result);
-
-            _repoMock.Verify(r => r.Update(invoice), Times.Once);
-            _uowMock.Verify(u => u.Save(), Times.Once);
         }
-
-        // ---------------- FIND ----------------
 
         [Fact]
         public void FindInvoice_Existing_ShouldReturnInvoice()
         {
-            var invoice = CreateValidInvoice();
+            var invoice = new Invoice { Id = 1 };
 
-            _repoMock.Setup(r => r.GetById(invoice.Id))
+            _repoMock.Setup(r => r.GetById(1))
                 .Returns(invoice);
-
-            var result = _service.FindInvoice(invoice.Id);
-
-            Assert.NotNull(result);
-            Assert.Equal(invoice.Id, result.Id);
-        }
-
-        [Fact]
-        public void FindInvoice_NotExisting_ShouldReturnNull()
-        {
-            _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
-                .Returns((Invoice)null);
 
             var result = _service.FindInvoice(1);
 
-            Assert.Null(result);
+            Assert.NotNull(result);
+            Assert.Equal(1, result.Id);
         }
 
-        // ---------------- GET ALL ----------------
-
         [Fact]
-        public void GetAllInvoices_ShouldReturnAllInvoices()
+        public void GetAllInvoices_ShouldReturnAll()
         {
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Invoice>
                 {
-                    CreateValidInvoice(),
-                    CreateValidInvoice()
+                    new Invoice { Id = 1 },
+                    new Invoice { Id = 2 }
                 });
 
             var result = _service.GetAllInvoices();

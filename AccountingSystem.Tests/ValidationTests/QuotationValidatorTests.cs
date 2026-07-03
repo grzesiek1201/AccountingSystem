@@ -48,7 +48,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void EmptyCustomer_ReturnsError()
         {
             var q = CreateValidQuotation();
-            q.Customer = null;
+            q.CustomerId = 0;
 
             var result = _validator.Validate(q, new List<Quotation>());
 

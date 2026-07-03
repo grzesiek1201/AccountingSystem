@@ -48,7 +48,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void EmptyCustomer_ReturnsError()
         {
             var order = CreateValidOrder();
-            order.Customer = null;
+            order.CustomerId = 0;
 
             var result = _validator.Validate(order, new List<Order>());
             Assert.NotEmpty(result.Errors);

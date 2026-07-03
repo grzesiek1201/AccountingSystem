@@ -50,7 +50,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void EmptyCustomer_ReturnsError()
         {
             var inv = CreateValidInvoice();
-            inv.Customer = null;
+            inv.CustomerId = 0;
 
             var result = _validator.Validate(inv, new List<Invoice>());
             Assert.NotEmpty(result.Errors);

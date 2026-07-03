@@ -37,7 +37,7 @@ namespace AccountingSystem.Tests.ValidationTests
                 Amount = amount,
                 PaymentDate = new DateTime(2026, 1, 1),
                 Method = AccountingSystem.Domain.Enums.PaymentMethod.Cash,
-                Status = AccountingSystem.Domain.Enums.PaymentStatus.Completed
+                Status = AccountingSystem.Domain.Enums.PaymentStatus.Paid
             };
         }
 

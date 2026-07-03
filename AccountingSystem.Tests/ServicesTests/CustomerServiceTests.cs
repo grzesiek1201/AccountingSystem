@@ -7,6 +7,7 @@ using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit;
 
 namespace AccountingSystem.Tests.ServicesTests
 {
@@ -33,8 +34,6 @@ namespace AccountingSystem.Tests.ServicesTests
                 _loggerMock.Object
             );
         }
-
-        // ================= HELPERS =================
 
         private CreateCustomerRequest CreateValidRequest()
         {
@@ -107,6 +106,7 @@ namespace AccountingSystem.Tests.ServicesTests
             Assert.Equal(CustomerAddResult.InvalidData, result.Result);
 
             _repoMock.Verify(r => r.Add(It.IsAny<Customer>()), Times.Never);
+            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
         // ================= EDIT =================

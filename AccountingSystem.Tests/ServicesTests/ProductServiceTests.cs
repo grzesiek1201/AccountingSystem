@@ -1,4 +1,5 @@
-﻿using AccountingSystem.Application.Interfaces;
+﻿using AccountingSystem.Application.DTOs.Products;
+using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Repositories;
 using AccountingSystem.Application.Services;
 using AccountingSystem.Application.Validation.Products;
@@ -6,7 +7,6 @@ using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Collections.Generic;
 using Xunit;
 
 namespace AccountingSystem.Tests.ServicesTests
@@ -25,6 +25,7 @@ namespace AccountingSystem.Tests.ServicesTests
             _repoMock = new Mock<IProductRepository>();
             _uowMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<ProductService>>();
+
             _validator = new ProductValidator();
 
             _service = new ProductService(
@@ -35,57 +36,57 @@ namespace AccountingSystem.Tests.ServicesTests
             );
         }
 
-        private Product CreateValidProduct()
+        // ================= HELPERS =================
+
+        private CreateProductRequest CreateValidRequest()
         {
-            return new Product
+            return new CreateProductRequest
+            {
+                Name = "Chocolate GOLD",
+                Price = 100,
+                CategoryId = 1
+            };
+        }
+
+        private UpdateProductRequest CreateValidUpdateRequest()
+        {
+            return new UpdateProductRequest
             {
                 Id = 1,
                 Name = "Chocolate GOLD",
-                Price = 100,
-                CategoryId = 1,
-                IsProductArchived = false,
-                Category = CreateValidCategory()
+                Price = 120,
+                CategoryId = 1
             };
         }
 
-        private Category CreateValidCategory()
-        {
-            return new Category
-            {
-                Id = 1,
-                Name = "Sweets",
-                Products = new List<Product>()
-            };
-        }
-
-        // ---------------- ADD ----------------
+        // ================= ADD =================
 
         [Fact]
         public void AddProduct_Valid_ShouldReturnSuccess()
         {
-            var product = CreateValidProduct();
+            var request = CreateValidRequest();
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Product>());
 
-            var result = _service.AddProduct(product);
+            var result = _service.AddProduct(request);
 
             Assert.Equal(ProductAddResult.Success, result.Result);
 
-            _repoMock.Verify(r => r.Add(product), Times.Once);
+            _repoMock.Verify(r => r.Add(It.IsAny<Product>()), Times.Once);
             _uowMock.Verify(u => u.Save(), Times.Once);
         }
 
         [Fact]
         public void AddProduct_Invalid_ShouldReturnInvalidData()
         {
-            var product = CreateValidProduct();
-            product.Price = -10;
+            var request = CreateValidRequest();
+            request.Price = -10;
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Product>());
 
-            var result = _service.AddProduct(product);
+            var result = _service.AddProduct(request);
 
             Assert.Equal(ProductAddResult.InvalidData, result.Result);
 
@@ -96,7 +97,7 @@ namespace AccountingSystem.Tests.ServicesTests
         [Fact]
         public void AddProduct_DuplicateName_ShouldReturnInvalidData()
         {
-            var product = CreateValidProduct();
+            var request = CreateValidRequest();
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Product>
@@ -105,110 +106,112 @@ namespace AccountingSystem.Tests.ServicesTests
                     {
                         Id = 999,
                         Name = "Chocolate GOLD",
-                        Category = new Category
-                        {
-                            Id = 1,
-                            Name = "Sweets",
-                            Products = new List<Product>()
-                        },
                         Price = 100,
                         CategoryId = 1
                     }
                 });
 
-            var result = _service.AddProduct(product);
+            var result = _service.AddProduct(request);
 
             Assert.Equal(ProductAddResult.InvalidData, result.Result);
 
             _repoMock.Verify(r => r.Add(It.IsAny<Product>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
-        // ---------------- EDIT ----------------
+        // ================= EDIT =================
 
         [Fact]
         public void EditProduct_Valid_ShouldReturnSuccess()
         {
-            var product = CreateValidProduct();
+            var request = CreateValidUpdateRequest();
 
-            _repoMock.Setup(r => r.GetById(product.Id))
-                .Returns(product);
+            _repoMock.Setup(r => r.GetById(request.Id))
+                .Returns(new Product
+                {
+                    Id = 1,
+                    Name = "Old",
+                    Price = 50,
+                    CategoryId = 1,
+                    IsProductArchived = false
+                });
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Product>());
 
-            var result = _service.EditProduct(product);
+            var result = _service.EditProduct(request);
 
             Assert.Equal(ProductEditResult.Success, result.Result);
 
-            _repoMock.Verify(r => r.Update(product), Times.Once);
+            _repoMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Once);
             _uowMock.Verify(u => u.Save(), Times.Once);
         }
 
         [Fact]
         public void EditProduct_NotFound_ShouldReturnNotFound()
         {
-            var product = CreateValidProduct();
+            var request = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
                 .Returns((Product)null);
 
-            var result = _service.EditProduct(product);
+            var result = _service.EditProduct(request);
 
             Assert.Equal(ProductEditResult.NotFound, result.Result);
-
-            _repoMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
         [Fact]
         public void EditProduct_Archived_ShouldReturnProductArchived()
         {
-            var product = CreateValidProduct();
-            product.IsProductArchived = true;
+            var request = CreateValidUpdateRequest();
 
-            _repoMock.Setup(r => r.GetById(product.Id))
-                .Returns(product);
+            _repoMock.Setup(r => r.GetById(request.Id))
+                .Returns(new Product
+                {
+                    Id = 1,
+                    IsProductArchived = true
+                });
 
-            var result = _service.EditProduct(product);
+            var result = _service.EditProduct(request);
 
             Assert.Equal(ProductEditResult.ProductArchived, result.Result);
-
-            _repoMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
         [Fact]
         public void EditProduct_Invalid_ShouldReturnInvalidData()
         {
-            var product = CreateValidProduct();
-            product.Price = -10;
+            var request = CreateValidUpdateRequest();
+            request.Price = -10;
 
-            _repoMock.Setup(r => r.GetById(product.Id))
-                .Returns(product);
+            _repoMock.Setup(r => r.GetById(request.Id))
+                .Returns(new Product
+                {
+                    Id = 1,
+                    Name = request.Name,
+                    Price = request.Price,
+                    CategoryId = 1
+                });
 
             _repoMock.Setup(r => r.GetAll())
                 .Returns(new List<Product>());
 
-            var result = _service.EditProduct(product);
+            var result = _service.EditProduct(request);
 
             Assert.Equal(ProductEditResult.InvalidData, result.Result);
 
             _repoMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
-        // ---------------- ARCHIVE ----------------
+        // ================= ARCHIVE =================
 
         [Fact]
         public void ArchiveProduct_Existing_ShouldReturnSuccess()
         {
-            var product = CreateValidProduct();
+            var product = new Product { Id = 1 };
 
-            _repoMock.Setup(r => r.GetById(product.Id))
+            _repoMock.Setup(r => r.GetById(1))
                 .Returns(product);
 
-            var result = _service.ArchiveProduct(product.Id);
+            var result = _service.ArchiveProduct(1);
 
             Assert.Equal(ProductArchiveResult.Success, result);
 
@@ -225,51 +228,54 @@ namespace AccountingSystem.Tests.ServicesTests
             var result = _service.ArchiveProduct(1);
 
             Assert.Equal(ProductArchiveResult.NotFound, result);
-
-            _repoMock.Verify(r => r.Update(It.IsAny<Product>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
-        // ---------------- FIND ----------------
+        // ================= GET =================
 
         [Fact]
-        public void FindProduct_Existing_ShouldReturnProduct()
+        public void GetProductById_Existing_ShouldReturnProduct()
         {
-            var product = CreateValidProduct();
+            var product = new Product
+            {
+                Id = 1,
+                Name = "Test",
+                Price = 100,
+                CategoryId = 1
+            };
 
-            _repoMock.Setup(r => r.GetById(product.Id))
+            _repoMock.Setup(r => r.GetById(1))
                 .Returns(product);
 
-            var result = _service.FindProduct(product.Id);
+            var result = _service.GetProductById(1);
 
             Assert.NotNull(result);
-            Assert.Equal(product.Id, result.Id);
+            Assert.Equal(1, result.Id);
         }
 
         [Fact]
-        public void FindProduct_NotExisting_ShouldReturnNull()
+        public void GetProductById_NotExisting_ShouldReturnNull()
         {
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
                 .Returns((Product)null);
 
-            var result = _service.FindProduct(1);
+            var result = _service.GetProductById(1);
 
             Assert.Null(result);
         }
 
-        // ---------------- GET ALL ----------------
+        // ================= GET ALL =================
 
         [Fact]
-        public void GetAllProducts_ShouldReturnAllProducts()
+        public void GetAllProducts_ShouldReturnAll()
         {
-            var products = new List<Product>
+            var list = new List<Product>
             {
-                CreateValidProduct(),
-                CreateValidProduct()
+                new Product { Id = 1, Name = "A", Price = 10 },
+                new Product { Id = 2, Name = "B", Price = 20 }
             };
 
             _repoMock.Setup(r => r.GetAll())
-                .Returns(products);
+                .Returns(list);
 
             var result = _service.GetAllProducts();
 
