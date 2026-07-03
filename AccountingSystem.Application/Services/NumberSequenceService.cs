@@ -5,11 +5,6 @@ using System;
 
 namespace AccountingSystem.Application.Services
 {
-
-    public interface INumberSequenceService
-    {
-        string GetNext(DocumentType type);
-    }
     public class NumberSequenceService : INumberSequenceService
     {
         private readonly INumberSequenceRepository _repository;
@@ -25,7 +20,7 @@ namespace AccountingSystem.Application.Services
 
         public string GetNext(DocumentType type)
         {
-            int year = DateTime.Now.Year;
+            int year = DateTime.UtcNow.Year;
 
             var sequence = _repository.GetNext(type, year);
 

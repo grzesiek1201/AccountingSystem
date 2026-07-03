@@ -68,6 +68,8 @@ namespace AccountingSystem.Application.Services
                 CustomerId = request.CustomerId,
                 Status = InvoiceStatus.Draft,
                 DateCreated = DateTime.UtcNow,
+                IssueDate = DateTime.UtcNow,
+                DueDate = DateTime.UtcNow.AddDays(14),
                 InvoiceNumber = _numberSequenceService.GetNext(DocumentType.Invoice)
             };
 

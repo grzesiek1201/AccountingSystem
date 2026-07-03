@@ -84,7 +84,7 @@ namespace AccountingSystem.Application.Services
 
             if (existing.IsCustomerArchived)
             {
-                _logger.LogWarning("Attempt to edit archived product. Id: {ProductId}", request.Id);
+                _logger.LogWarning("Attempt to edit archived customer. Id: {CustomerId}", request.Id);
                 return new CustomerEditResponse
                 {
                     Result = CustomerEditResult.CustomerArchived
@@ -106,7 +106,7 @@ namespace AccountingSystem.Application.Services
 
             if (!result.IsValid)
             {
-                _logger.LogWarning("EditProduct validation failed. Id: {CustomerId}, Errors: {Errors}",
+                _logger.LogWarning("EditCustomer validation failed. Id: {CustomerId}, Errors: {Errors}",
                     existing.Id, result.Errors);
 
                 return new CustomerEditResponse

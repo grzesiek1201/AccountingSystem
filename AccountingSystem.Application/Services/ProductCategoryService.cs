@@ -154,32 +154,25 @@ namespace AccountingSystem.Application.Services
 
         // ================= CHANGE STATUS =================
 
-        public ProductCategoryStatusResult ChangeProductCategoryStatus(int id, bool isActive)
+        public ProductCategoryStatusResponse ChangeProductCategoryStatus(int id, bool isActive)
         {
-            _logger.LogInformation("Changing product category status. Id: {ProductCategoryId}", id);
+            var category = _productCategoryRepository.GetById(id);
 
-            var existing = _productCategoryRepository.GetById(id);
+            if (category == null)
+                return new ProductCategoryStatusResponse
+                {
+                    Result = ProductCategoryStatusResult.NotFound
+                };
 
-            if (existing == null)
-            {
-                _logger.LogWarning("Product category not found for changing status. Id: {ProductCategoryId}", id);
-                return ProductCategoryStatusResult.NotFound;
-            }
+            category.IsActive = isActive;
 
-            if (existing.IsActive == isActive)
-            {
-                _logger.LogInformation("No status change required. Id: {ProductCategoryId}", id);
-                return ProductCategoryStatusResult.Success;
-            }
-
-            existing.IsActive = isActive;
-
-            _productCategoryRepository.Update(existing);
+            _productCategoryRepository.Update(category);
             _unitOfWork.Save();
 
-            _logger.LogInformation("Product category status changed successfully. Id: {ProductCategoryId}", id);
-
-            return ProductCategoryStatusResult.Success;
+            return new ProductCategoryStatusResponse
+            {
+                Result = ProductCategoryStatusResult.Success
+            };
         }
     }
 }

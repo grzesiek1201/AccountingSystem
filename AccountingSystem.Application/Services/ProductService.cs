@@ -45,8 +45,6 @@ namespace AccountingSystem.Application.Services
 
             if (!result.IsValid)
             {
-                _logger.LogWarning("AddProduct validation failed. Errors: {Errors}", result.Errors);
-
                 return new ProductAddResponse
                 {
                     Result = ProductAddResult.InvalidData,
@@ -59,7 +57,8 @@ namespace AccountingSystem.Application.Services
 
             return new ProductAddResponse
             {
-                Result = ProductAddResult.Success
+                Result = ProductAddResult.Success,
+                Id = product.Id
             };
         }
 
