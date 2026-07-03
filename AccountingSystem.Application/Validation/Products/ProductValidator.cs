@@ -26,7 +26,7 @@ namespace AccountingSystem.Application.Validation.Products
                 result.Errors.Add(ProductValidationError.InvalidPrice);
             }
 
-            if (product.Category == null)
+            if (product.CategoryId <= 0)
             {
                 result.Errors.Add(ProductValidationError.EmptyCategory);
             }
