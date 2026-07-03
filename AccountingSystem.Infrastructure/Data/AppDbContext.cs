@@ -21,6 +21,8 @@ namespace AccountingSystem.Infrastructure.Data
         public DbSet<OrderItem> OrderItems { get; set; }
 
         public DbSet<Invoice> Invoices { get; set; }
+
+        public DbSet<Payment> Payments { get; set; }
         public DbSet<NumberSequence> NumberSequences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -98,6 +100,17 @@ namespace AccountingSystem.Infrastructure.Data
             modelBuilder.Entity<InvoiceItem>()
                 .Property(i => i.DiscountPercent)
                 .HasPrecision(5, 2);
+
+            // ================= PAYMENT =================
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Invoice)
+                .WithMany(i => i.Payments)
+                .HasForeignKey(p => p.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
