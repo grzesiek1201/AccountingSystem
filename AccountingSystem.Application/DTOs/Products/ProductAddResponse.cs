@@ -6,7 +6,9 @@ namespace AccountingSystem.Application.DTOs.Products
     {
         public ProductAddResult Result { get; set; }
 
-        public List<ProductValidationError> Errors { get; set; } = new List<ProductValidationError>();
+        public int? Id { get; set; }
+
+        public List<ProductValidationError> Errors { get; set; } = new();
 
         public bool IsSuccess => Result == ProductAddResult.Success;
     }

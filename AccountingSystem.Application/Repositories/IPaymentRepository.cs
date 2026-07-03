@@ -14,5 +14,7 @@ namespace AccountingSystem.Application.Repositories
         List<Payment> GetByInvoiceId(int invoiceId);
 
         void Delete(Payment payment);
+
+        decimal GetTotalPaidForInvoice(int invoiceId);
     }
 }
