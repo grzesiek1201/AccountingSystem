@@ -1,3 +1,4 @@
+using AccountingSystem.Application.Helpers;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -6,6 +7,7 @@ using AccountingSystem.Application.Validation.Customers;
 using AccountingSystem.Application.Validation.Invoices;
 using AccountingSystem.Application.Validation.Orders;
 using AccountingSystem.Application.Validation.Payments;
+using AccountingSystem.Application.Validation.ProductCategories;
 using AccountingSystem.Application.Validation.Products;
 using AccountingSystem.Application.Validation.Quotations;
 using AccountingSystem.Infrastructure.Data;
@@ -33,10 +35,8 @@ builder.Services.AddSwaggerGen();
 // =====================
 // Application services
 // =====================
-builder.Services.AddScoped<NumberSequenceService>();
 builder.Services.AddScoped<QuotationToOrderMapper>();
 builder.Services.AddScoped<OrderToInvoiceMapper>();
-builder.Services.AddScoped<DocumentConversionService>();
 builder.Services.AddScoped<QuotationResponseMapper>();
 builder.Services.AddScoped<OrderResponseMapper>();
 builder.Services.AddScoped<InvoiceResponseMapper>();
@@ -48,15 +48,19 @@ builder.Services.AddScoped<QuotationValidator>();
 builder.Services.AddScoped<OrderValidator>();
 builder.Services.AddScoped<InvoiceValidator>();
 builder.Services.AddScoped<PaymentValidator>();
+builder.Services.AddScoped<IInvoiceStatusCalculator, InvoiceStatusCalculator>();
+builder.Services.AddScoped<ProductCategoryValidator>();
 
 // SERVICES
 builder.Services.AddScoped<ICustomerService, CustomerService>();
 builder.Services.AddScoped<IProductService, ProductService>();
-builder.Services.AddScoped<OrderService>();
-builder.Services.AddScoped<QuotationService>();
-builder.Services.AddScoped<InvoiceService>();
-builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
+builder.Services.AddScoped<IQuotationService, QuotationService>();
+builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+builder.Services.AddScoped<IPaymentService, PaymentService>();
 builder.Services.AddScoped<INumberSequenceService, NumberSequenceService>();
+builder.Services.AddScoped<IProductCategoryService, ProductCategoryService>();
+
 
 
 // REPOSITORIES + UOW
@@ -68,6 +72,7 @@ builder.Services.AddScoped<IOrderRepository, OrderRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 builder.Services.AddScoped<INumberSequenceRepository, NumberSequenceRepository>();
+builder.Services.AddScoped<IProductCategoryRepository, ProductCategoryRepository>();
 
 var app = builder.Build();
 

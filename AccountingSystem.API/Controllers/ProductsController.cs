@@ -62,16 +62,10 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
-    public IActionResult Create(CreateProductRequest request)
+    public IActionResult Create([FromBody] CreateProductRequest request)
     {
         _logger.LogInformation("POST product Name={Name}", request.Name);
-
-        var product = new Product
-        {
-            Name = request.Name,
-            Price = request.Price,
-            CategoryId = request.CategoryId
-        };
+        _logger.LogInformation("RAW REQUEST: {@Request}", request);
 
         var result = _productService.AddProduct(request);
 
@@ -81,15 +75,7 @@ public class ProductsController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        _logger.LogInformation("Product created: {Id}", product.Id);
-
-        return CreatedAtAction(nameof(Find), new { id = product.Id }, new ProductResponse
-        {
-            Id = product.Id,
-            Name = product.Name,
-            Price = product.Price,
-            CategoryId = product.CategoryId
-        });
+        return Ok(result);
     }
 
     [HttpPut("{id}")]
