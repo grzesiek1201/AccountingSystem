@@ -1,8 +1,8 @@
 ﻿using AccountingSystem.Domain.Entities;
 
-namespace AccountingSystem.Application.Mappers
+namespace AccountingSystem.Application.Converters
 {
-    public class QuotationToOrderMapper
+    public class QuotationToOrderConverter
     {
         public Order Map(Quotation quotation)
         {

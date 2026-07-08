@@ -1,8 +1,8 @@
 ﻿using AccountingSystem.Domain.Entities;
 
-namespace AccountingSystem.Application.Mappers
+namespace AccountingSystem.Application.Converters
 {
-    public class OrderToInvoiceMapper
+    public class OrderToInvoiceConverter
     {
         public Invoice Map(Order order)
         {
