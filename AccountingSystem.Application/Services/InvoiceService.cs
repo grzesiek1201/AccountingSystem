@@ -1,5 +1,7 @@
+using AccountingSystem.Application.Converters;
 using AccountingSystem.Application.DTOs.Invoices;
-using AccountingSystem.Application.Helpers.Snapshots;
+using AccountingSystem.Application.Factories;
+using AccountingSystem.Application.Helpers;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -17,12 +19,13 @@ namespace AccountingSystem.Application.Services
         private readonly InvoiceValidator _validator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<InvoiceService> _logger;
+        private readonly InvoiceFactory _invoiceFactory;
         private readonly INumberSequenceService _numberSequenceService;
         private readonly ICustomerRepository _customerRepository;
         private readonly IProductRepository _productRepository;
         private readonly InvoiceResponseMapper _mapper;
         private readonly IOrderRepository _orderRepository;
-        private readonly OrderToInvoiceMapper _orderToInvoiceMapper;
+        private readonly OrderToInvoiceConverter _orderToInvoiceMapper;
         private readonly IInvoiceStatusCalculator _statusCalculator;
 
         public InvoiceService(
@@ -31,12 +34,13 @@ namespace AccountingSystem.Application.Services
             InvoiceValidator validator,
             IUnitOfWork unitOfWork,
             ILogger<InvoiceService> logger,
+            InvoiceFactory invoiceFactory,
             INumberSequenceService numberSequenceService,
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
             InvoiceResponseMapper mapper,
             IOrderRepository orderRepository,
-            OrderToInvoiceMapper orderToInvoiceMapper,
+            OrderToInvoiceConverter orderToInvoiceMapper,
             IInvoiceStatusCalculator statusCalculator)
         {
             _invoiceRepository = invoiceRepository;
@@ -44,6 +48,7 @@ namespace AccountingSystem.Application.Services
             _validator = validator;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _invoiceFactory = invoiceFactory;
             _numberSequenceService = numberSequenceService;
             _customerRepository = customerRepository;
             _productRepository = productRepository;
@@ -59,34 +64,22 @@ namespace AccountingSystem.Application.Services
             if (customer == null)
                 return new InvoiceAddResponse { Result = InvoiceAddResult.InvalidData };
 
-            var productIds = request.Items?.Select(i => i.ProductId).ToList() ?? new List<int>();
+            var productIds = request.Items?
+                .Select(i => i.ProductId)
+                .ToList() ?? new List<int>();
 
-            var products = _productRepository.GetByIds(productIds).ToDictionary(p => p.Id);
+            var products = _productRepository
+                .GetByIds(productIds)
+                .ToDictionary(p => p.Id);
 
-            var invoice = new Invoice
-            {
-                CustomerId = request.CustomerId,
-                Status = InvoiceStatus.Draft,
-                DateCreated = DateTime.UtcNow,
-                IssueDate = DateTime.UtcNow,
-                DueDate = DateTime.UtcNow.AddDays(14),
-                InvoiceNumber = _numberSequenceService.GetNext(DocumentType.Invoice)
-            };
-
-            invoice.ApplyCustomerSnapshot(customer);
-
-            var domainItems = request.Items?
-                .Select(x => new InvoiceItem
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    DiscountPercent = x.DiscountPercent
-                })
-                .ToList() ?? new List<InvoiceItem>();
-
-            invoice.Items = ItemSnapshotHelper.SnapshotInvoiceItems(domainItems, products);
-
-            var validation = _validator.Validate(invoice, _invoiceRepository.GetAll());
+            var invoice = _invoiceFactory.Create(
+                request,
+                customer,
+                products);
+        
+            var validation = _validator.Validate(
+                invoice,
+                _invoiceRepository.GetAll());
 
             if (!validation.IsValid)
                 return new InvoiceAddResponse

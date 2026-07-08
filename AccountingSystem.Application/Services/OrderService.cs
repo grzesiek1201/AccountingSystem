@@ -1,5 +1,7 @@
+using AccountingSystem.Application.Converters;
 using AccountingSystem.Application.DTOs.Orders;
-using AccountingSystem.Application.Helpers.Snapshots;
+using AccountingSystem.Application.Factories;
+using AccountingSystem.Application.Helpers;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -16,29 +18,32 @@ namespace AccountingSystem.Application.Services
         private readonly OrderValidator _validator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<OrderService> _logger;
+        private readonly OrderFactory _orderFactory;
         private readonly INumberSequenceService _numberSequenceService;
         private readonly ICustomerRepository _customerRepository;
         private readonly IProductRepository _productRepository;
         private readonly OrderResponseMapper _mapper;
         private readonly IQuotationRepository _quotationRepository;
-        private readonly QuotationToOrderMapper _quotationToOrderMapper;
+        private readonly QuotationToOrderConverter _quotationToOrderMapper;
 
         public OrderService(
             IOrderRepository orderRepository,
             OrderValidator validator,
             IUnitOfWork unitOfWork,
             ILogger<OrderService> logger,
+            OrderFactory orderFactory,
             INumberSequenceService numberSequenceService,
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
             OrderResponseMapper mapper,
             IQuotationRepository quotationRepository,
-            QuotationToOrderMapper quotationToOrderMapper)
+            QuotationToOrderConverter quotationToOrderMapper)
         {
             _orderRepository = orderRepository;
             _validator = validator;
             _unitOfWork = unitOfWork;
             _logger = logger;
+            _orderFactory = orderFactory;
             _numberSequenceService = numberSequenceService;
             _customerRepository = customerRepository;
             _productRepository = productRepository;
@@ -54,6 +59,7 @@ namespace AccountingSystem.Application.Services
             _logger.LogInformation("AddOrder start. CustomerId: {CustomerId}", request.CustomerId);
 
             var customer = _customerRepository.GetById(request.CustomerId);
+
             if (customer == null)
                 return new OrderAddResponse { Result = OrderAddResult.InvalidData };
 
@@ -65,27 +71,9 @@ namespace AccountingSystem.Application.Services
                 .GetByIds(productIds)
                 .ToDictionary(p => p.Id);
 
-            var order = new Order
-            {
-                CustomerId = request.CustomerId,
-                Status = OrderStatus.Draft,
-                DateCreated = DateTime.UtcNow,
-                OrderNumber = _numberSequenceService.GetNext(DocumentType.Order)
-            };
-
-            order.ApplyCustomerSnapshot(customer);
-
-            var domainItems = request.Items?
-                .Select(x => new OrderItem
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    DiscountPercent = x.DiscountPercent
-                })
-                .ToList() ?? new List<OrderItem>();
-
-            order.Items = ItemSnapshotHelper.SnapshotOrderItems(
-                domainItems,
+            var order = _orderFactory.Create(
+                request,
+                customer,
                 products);
 
             var validation = _validator.Validate(

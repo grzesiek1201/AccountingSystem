@@ -1,12 +1,13 @@
 using AccountingSystem.Application.DTOs.Quotations;
-using AccountingSystem.Application.Helpers.Snapshots;
+using AccountingSystem.Application.Factories;
+using AccountingSystem.Application.Helpers;
 using AccountingSystem.Application.Interfaces;
+using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
 using AccountingSystem.Application.Validation.Quotations;
 using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
-using AccountingSystem.Application.Mappers;
 
 namespace AccountingSystem.Application.Services
 {
@@ -16,7 +17,8 @@ namespace AccountingSystem.Application.Services
         private readonly QuotationValidator _validator;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<QuotationService> _logger;
-        private readonly INumberSequenceService _numberSequenceService;
+        private readonly QuotationFactory _quotationFactory;
+
         private readonly ICustomerRepository _customerRepository;
         private readonly IProductRepository _productRepository;
         private readonly QuotationResponseMapper _mapper;
@@ -26,7 +28,8 @@ namespace AccountingSystem.Application.Services
             QuotationValidator validator,
             IUnitOfWork unitOfWork,
             ILogger<QuotationService> logger,
-            INumberSequenceService numberSequenceService,
+            QuotationFactory quotationFactory,
+
             ICustomerRepository customerRepository,
             IProductRepository productRepository,
             QuotationResponseMapper mapper)
@@ -35,7 +38,8 @@ namespace AccountingSystem.Application.Services
             _validator = validator;
             _unitOfWork = unitOfWork;
             _logger = logger;
-            _numberSequenceService = numberSequenceService;
+            _quotationFactory = quotationFactory;
+
             _customerRepository = customerRepository;
             _productRepository = productRepository;
             _mapper = mapper;
@@ -48,6 +52,7 @@ namespace AccountingSystem.Application.Services
             _logger.LogInformation("AddQuotation start. CustomerId: {CustomerId}", request.CustomerId);
 
             var customer = _customerRepository.GetById(request.CustomerId);
+
             if (customer == null)
                 return new QuotationAddResponse { Result = QuotationAddResult.InvalidData };
 
@@ -59,27 +64,9 @@ namespace AccountingSystem.Application.Services
                 .GetByIds(productIds)
                 .ToDictionary(p => p.Id);
 
-            var quotation = new Quotation
-            {
-                CustomerId = request.CustomerId,
-                Status = QuotationStatus.Draft,
-                DateCreated = DateTime.UtcNow,
-                QuotationNumber = _numberSequenceService.GetNext(DocumentType.Quotation)
-            };
-
-            quotation.ApplyCustomerSnapshot(customer);
-
-            var domainItems = request.Items?
-                .Select(x => new QuotationItem
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    DiscountPercent = x.DiscountPercent
-                })
-                .ToList() ?? new List<QuotationItem>();
-
-            quotation.Items = ItemSnapshotHelper.SnapshotQuotationItems(
-                domainItems,
+            var quotation = _quotationFactory.Create(
+                request,
+                customer,
                 products);
 
             var validation = _validator.Validate(
@@ -124,6 +111,14 @@ namespace AccountingSystem.Application.Services
 
             if (request.Items != null && request.Items.Any())
             {
+                var productIds = request.Items
+                    .Select(i => i.ProductId)
+                    .ToList();
+
+                var products = _productRepository
+                    .GetByIds(productIds)
+                    .ToDictionary(p => p.Id);
+
                 var domainItems = request.Items
                     .Select(x => new QuotationItem
                     {
@@ -132,12 +127,6 @@ namespace AccountingSystem.Application.Services
                         DiscountPercent = x.DiscountPercent
                     })
                     .ToList();
-
-                var productIds = domainItems.Select(i => i.ProductId).ToList();
-
-                var products = _productRepository
-                    .GetByIds(productIds)
-                    .ToDictionary(p => p.Id);
 
                 existing.Items = ItemSnapshotHelper.SnapshotQuotationItems(
                     domainItems,
