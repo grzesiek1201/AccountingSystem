@@ -1,6 +1,6 @@
 ﻿using AccountingSystem.Domain.Entities;
 
-namespace AccountingSystem.Application.Helpers.Snapshots
+namespace AccountingSystem.Application.Helpers
 {
     public static class CustomerSnapshotHelper
     {

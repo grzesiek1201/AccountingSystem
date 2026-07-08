@@ -1,37 +1,31 @@
 ﻿using AccountingSystem.Domain.Entities;
 
-namespace AccountingSystem.Application.Helpers.Snapshots
+namespace AccountingSystem.Application.Helpers
 {
     public static class ItemSnapshotHelper
     {
         public static List<QuotationItem> SnapshotQuotationItems(
-        IEnumerable<QuotationItem> items,
-        IDictionary<int, Product> products)
+            IEnumerable<QuotationItem> items,
+            IDictionary<int, Product> products)
         {
             return items.Select(i =>
             {
-                if (!products.TryGetValue(i.ProductId, out var product) || product == null)
-                    throw new InvalidOperationException($"Product not found: {i.ProductId}");
-
-                if (string.IsNullOrWhiteSpace(product.Name))
-                    throw new InvalidOperationException($"Product name missing: {i.ProductId}");
+                var snapshot = CreateSnapshotData(i.ProductId, i.Quantity, i.DiscountPercent, i.Position, products);
 
                 return new QuotationItem
                 {
-                    ProductId = i.ProductId,
-                    ProductName = product.Name,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent,
-                    Position = i.Position,
-                    BaseUnitPrice = product.Price,
-
-                    Total = Math.Round(
-                    i.Quantity * product.Price * (1 - i.DiscountPercent / 100m),
-                    2,
-                    MidpointRounding.AwayFromZero)
+                    ProductId = snapshot.ProductId,
+                    ProductName = snapshot.ProductName,
+                    Quantity = snapshot.Quantity,
+                    DiscountPercent = snapshot.DiscountPercent,
+                    Position = snapshot.Position,
+                    BaseUnitPrice = snapshot.BaseUnitPrice,
+                    Total = snapshot.Total
                 };
+
             }).ToList();
         }
+
 
         public static List<OrderItem> SnapshotOrderItems(
             IEnumerable<OrderItem> items,
@@ -39,25 +33,22 @@ namespace AccountingSystem.Application.Helpers.Snapshots
         {
             return items.Select(i =>
             {
-                if (!products.TryGetValue(i.ProductId, out var product))
-                    throw new InvalidOperationException($"Product not found: {i.ProductId}");
+                var snapshot = CreateSnapshotData(i.ProductId, i.Quantity, i.DiscountPercent, i.Position, products);
 
                 return new OrderItem
                 {
-                    ProductId = i.ProductId,
-                    ProductName = product.Name,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent,
-                    Position = i.Position,
-                    BaseUnitPrice = product.Price,
-
-                    Total = Math.Round(
-                    i.Quantity * product.Price * (1 - i.DiscountPercent / 100m),
-                    2,
-                    MidpointRounding.AwayFromZero)
+                    ProductId = snapshot.ProductId,
+                    ProductName = snapshot.ProductName,
+                    Quantity = snapshot.Quantity,
+                    DiscountPercent = snapshot.DiscountPercent,
+                    Position = snapshot.Position,
+                    BaseUnitPrice = snapshot.BaseUnitPrice,
+                    Total = snapshot.Total
                 };
+
             }).ToList();
         }
+
 
         public static List<InvoiceItem> SnapshotInvoiceItems(
             IEnumerable<InvoiceItem> items,
@@ -65,24 +56,61 @@ namespace AccountingSystem.Application.Helpers.Snapshots
         {
             return items.Select(i =>
             {
-                if (!products.TryGetValue(i.ProductId, out var product))
-                    throw new InvalidOperationException($"Product not found: {i.ProductId}");
+                var snapshot = CreateSnapshotData(i.ProductId, i.Quantity, i.DiscountPercent, i.Position, products);
 
                 return new InvoiceItem
                 {
-                    ProductId = i.ProductId,
-                    ProductName = product.Name,
-                    Quantity = i.Quantity,
-                    DiscountPercent = i.DiscountPercent,
-                    Position = i.Position,
-                    BaseUnitPrice = product.Price,
-
-                    Total = Math.Round(
-                    i.Quantity * product.Price * (1 - i.DiscountPercent / 100m),
-                    2,
-                    MidpointRounding.AwayFromZero)
+                    ProductId = snapshot.ProductId,
+                    ProductName = snapshot.ProductName,
+                    Quantity = snapshot.Quantity,
+                    DiscountPercent = snapshot.DiscountPercent,
+                    Position = snapshot.Position,
+                    BaseUnitPrice = snapshot.BaseUnitPrice,
+                    Total = snapshot.Total
                 };
+
             }).ToList();
+        }
+
+
+        private static ItemSnapshotData CreateSnapshotData(
+            int productId,
+            int quantity,
+            decimal discountPercent,
+            int position,
+            IDictionary<int, Product> products)
+        {
+            if (!products.TryGetValue(productId, out var product))
+                throw new InvalidOperationException($"Product not found: {productId}");
+
+            if (string.IsNullOrWhiteSpace(product.Name))
+                throw new InvalidOperationException($"Product name missing: {productId}");
+
+            return new ItemSnapshotData
+            {
+                ProductId = product.Id,
+                ProductName = product.Name,
+                Quantity = quantity,
+                DiscountPercent = discountPercent,
+                Position = position,
+                BaseUnitPrice = product.Price,
+                Total = CalculateTotal(
+                    quantity,
+                    product.Price,
+                    discountPercent)
+            };
+        }
+
+
+        private static decimal CalculateTotal(
+            decimal quantity,
+            decimal price,
+            decimal discountPercent)
+        {
+            return Math.Round(
+                quantity * price * (1 - discountPercent / 100m),
+                2,
+                MidpointRounding.AwayFromZero);
         }
     }
 }
