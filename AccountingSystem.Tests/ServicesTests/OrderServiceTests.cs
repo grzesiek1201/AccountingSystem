@@ -1,4 +1,5 @@
-﻿using AccountingSystem.Application.DTOs.Orders;
+﻿using AccountingSystem.Application.Converters;
+using AccountingSystem.Application.DTOs.Orders;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -22,7 +23,7 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<IProductRepository> _productRepo;
         private readonly Mock<IQuotationRepository> _quotationRepoMock;
         private readonly Mock<OrderResponseMapper> _orderMapperMock;
-        private readonly Mock<QuotationToOrderMapper> _quotationToOrderMapperMock;
+        private readonly Mock<QuotationToOrderConverter> _quotationToOrderMapperMock;
 
         private readonly OrderValidator _validator;
         private readonly OrderService _service;
@@ -37,7 +38,7 @@ namespace AccountingSystem.Tests.ServicesTests
             _productRepo = new Mock<IProductRepository>();
             _quotationRepoMock = new Mock<IQuotationRepository>();
             _orderMapperMock = new Mock<OrderResponseMapper>();
-            _quotationToOrderMapperMock = new Mock<QuotationToOrderMapper>();
+            _quotationToOrderMapperMock = new Mock<QuotationToOrderConverter>();
 
             _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
                 .Returns("O-2026-0001");

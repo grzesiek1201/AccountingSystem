@@ -1,4 +1,5 @@
-﻿using AccountingSystem.Application.DTOs.Quotations;
+﻿using AccountingSystem.Application.Converters;
+using AccountingSystem.Application.DTOs.Quotations;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -22,7 +23,7 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<IProductRepository> _productRepo;
 
         private readonly QuotationResponseMapper _mapper;
-        private readonly QuotationToOrderMapper _quotationToOrderMapper;
+        private readonly QuotationToOrderConverter _quotationToOrderMapper;
 
         private readonly QuotationValidator _validator;
         private readonly QuotationService _service;
@@ -37,7 +38,7 @@ namespace AccountingSystem.Tests.ServicesTests
             _productRepo = new Mock<IProductRepository>();
 
             _mapper = new QuotationResponseMapper();
-            _quotationToOrderMapper = new QuotationToOrderMapper();
+            _quotationToOrderMapper = new QuotationToOrderConverter();
 
             _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
                 .Returns("Q-2026-0001");

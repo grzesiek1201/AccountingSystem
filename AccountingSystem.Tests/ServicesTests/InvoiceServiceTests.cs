@@ -1,4 +1,5 @@
-﻿using AccountingSystem.Application.DTOs.Invoices;
+﻿using AccountingSystem.Application.Converters;
+using AccountingSystem.Application.DTOs.Invoices;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -25,7 +26,7 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<IInvoiceStatusCalculator> _statusCalcMock;
 
         private readonly InvoiceResponseMapper _mapper;
-        private readonly OrderToInvoiceMapper _orderToInvoiceMapper;
+        private readonly OrderToInvoiceConverter _orderToInvoiceMapper;
 
         private readonly InvoiceValidator _validator;
         private readonly InvoiceService _service;
@@ -43,7 +44,7 @@ namespace AccountingSystem.Tests.ServicesTests
             _statusCalcMock = new Mock<IInvoiceStatusCalculator>();
 
             _mapper = new InvoiceResponseMapper();
-            _orderToInvoiceMapper = new OrderToInvoiceMapper();
+            _orderToInvoiceMapper = new OrderToInvoiceConverter();
             _validator = new InvoiceValidator();
 
             _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
