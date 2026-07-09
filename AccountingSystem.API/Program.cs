@@ -1,3 +1,4 @@
+using AccountingSystem.Application.Converters;
 using AccountingSystem.Application.Helpers;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
@@ -10,6 +11,7 @@ using AccountingSystem.Application.Validation.Payments;
 using AccountingSystem.Application.Validation.ProductCategories;
 using AccountingSystem.Application.Validation.Products;
 using AccountingSystem.Application.Validation.Quotations;
+using AccountingSystem.Application.Factories;
 using AccountingSystem.Infrastructure.Data;
 using AccountingSystem.Infrastructure.Repositories;
 using AccountingSystem.Infrastructure.UnitOfWork;
@@ -35,8 +37,16 @@ builder.Services.AddSwaggerGen();
 // =====================
 // Application services
 // =====================
-builder.Services.AddScoped<QuotationToOrderMapper>();
-builder.Services.AddScoped<OrderToInvoiceMapper>();
+// FACTORIES
+builder.Services.AddScoped<QuotationFactory>();
+builder.Services.AddScoped<OrderFactory>();
+builder.Services.AddScoped<InvoiceFactory>();
+
+// CONVERTERS
+builder.Services.AddScoped<QuotationToOrderConverter>();
+builder.Services.AddScoped<OrderToInvoiceConverter>();
+
+// RESPONSE MAPPERS
 builder.Services.AddScoped<QuotationResponseMapper>();
 builder.Services.AddScoped<OrderResponseMapper>();
 builder.Services.AddScoped<InvoiceResponseMapper>();
