@@ -6,35 +6,36 @@ namespace AccountingSystem.Application.Mappers
 {
     public class InvoiceResponseMapper
     {
-        public InvoiceResponse Map(Invoice o)
+        public InvoiceResponse Map(Invoice i)
         {
             return new InvoiceResponse
             {
-                Id = o.Id,
-                InvoiceNumber = o.InvoiceNumber,
-                Status = o.Status.ToString(),
-                DateCreated = o.DateCreated,
-                IssueDate = o.IssueDate,
-                DueDate = o.DueDate,
+                Id = i.Id,
+                InvoiceNumber = i.InvoiceNumber,
+                Status = i.Status.ToString(),
+                DateCreated = i.DateCreated,
+                IssueDate = i.IssueDate,
+                DueDate = i.DueDate,
 
                 Customer = new CustomerResponse
                 {
-                    Id = o.CustomerId,
-                    Email = o.CustomerEmail,
-                    Name = o.CustomerName,
-                    Street = o.CustomerStreet,
-                    ZipCode = o.CustomerZipCode,
-                    City = o.CustomerCity
+                    Id = i.CustomerId,
+                    NIP = i.CustomerNIP,
+                    Email = i.CustomerEmail,
+                    Name = i.CustomerName,
+                    Street = i.CustomerStreet,
+                    ZipCode = i.CustomerZipCode,
+                    City = i.CustomerCity
                 },
 
-                Items = o.Items.Select(o => new InvoiceItemResponse
+                Items = i.Items.Select(i => new InvoiceItemResponse
                 {
-                    ProductId = o.ProductId,
-                    ProductName = o.ProductName,
-                    Quantity = o.Quantity,
-                    DiscountPercent = o.DiscountPercent,
-                    BaseUnitPrice = o.BaseUnitPrice,
-                    Total = o.Total
+                    ProductId = i.ProductId,
+                    ProductName = i.ProductName,
+                    Quantity = i.Quantity,
+                    DiscountPercent = i.DiscountPercent,
+                    BaseUnitPrice = i.BaseUnitPrice,
+                    Total = i.Total
                 }).ToList()
             };
         }

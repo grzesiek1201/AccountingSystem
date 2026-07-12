@@ -10,6 +10,7 @@ namespace AccountingSystem.Application.Helpers
         {
             quotation.CustomerId = customer.Id;
 
+            quotation.CustomerNIP = customer.NIP;
             quotation.CustomerEmail = customer.Email;
             quotation.CustomerName = customer.Name;
             quotation.CustomerStreet = customer.Street;
@@ -23,6 +24,7 @@ namespace AccountingSystem.Application.Helpers
         {
             order.CustomerId = customer.Id;
 
+            order.CustomerNIP = customer.NIP;
             order.CustomerEmail = customer.Email;
             order.CustomerName = customer.Name;
             order.CustomerStreet = customer.Street;
@@ -36,6 +38,7 @@ namespace AccountingSystem.Application.Helpers
         {
             invoice.CustomerId = customer.Id;
 
+            invoice.CustomerNIP = customer.NIP;
             invoice.CustomerEmail = customer.Email;
             invoice.CustomerName = customer.Name;
             invoice.CustomerStreet = customer.Street;

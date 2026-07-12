@@ -35,6 +35,7 @@ public class CustomersController : ControllerBase
         {
             Id = c.Id,
             Name = c.Name,
+            NIP = c.NIP,
             Email = c.Email,
             City = c.City,
             Street = c.Street,
@@ -59,6 +60,7 @@ public class CustomersController : ControllerBase
         {
             Id = customer.Id,
             Name = customer.Name,
+            NIP = customer.NIP,
             Email = customer.Email,
             City = customer.City,
             Street = customer.Street,
@@ -74,6 +76,7 @@ public class CustomersController : ControllerBase
         var customer = new Customer
         {
             Name = request.Name,
+            NIP = request.NIP,
             Email = request.Email,
             City = request.City,
             Street = request.Street,
@@ -94,6 +97,7 @@ public class CustomersController : ControllerBase
         {
             Id = customer.Id,
             Name = customer.Name,
+            NIP = customer.NIP,
             Email = customer.Email,
             City = customer.City,
             Street = customer.Street,
@@ -110,6 +114,7 @@ public class CustomersController : ControllerBase
         {
             Id = id,
             Name = request.Name,
+            NIP = request.NIP,
             Email = request.Email,
             City = request.City,
             Street = request.Street,
@@ -130,6 +135,7 @@ public class CustomersController : ControllerBase
         {
             Id = customer.Id,
             Name = customer.Name,
+            NIP = customer.NIP,
             Email = customer.Email,
             City = customer.City,
             Street = customer.Street,

@@ -26,6 +26,26 @@ namespace AccountingSystem.Application.Validation.Customers
                 }
             }
 
+            if (string.IsNullOrWhiteSpace(customer.NIP))
+            {
+                result.Errors.Add(CustomerValidationError.EmptyNIP);
+            }
+            else
+            {
+                if (customer.NIP.Length != 10)
+                    result.Errors.Add(CustomerValidationError.InvalidNIP);
+
+                if (!customer.NIP.All(char.IsDigit))
+                    result.Errors.Add(CustomerValidationError.NotDigitsNIP);
+
+                if (customers.Any(x =>
+                    x.NIP == customer.NIP &&
+                    x.Id != customer.Id))
+                    {
+                        result.Errors.Add(CustomerValidationError.DuplicateNIP);
+                    }
+            }
+
             if (string.IsNullOrWhiteSpace(customer.Email))
             {
                 result.Errors.Add(CustomerValidationError.EmptyEmail);

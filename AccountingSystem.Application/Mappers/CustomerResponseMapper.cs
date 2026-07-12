@@ -11,6 +11,7 @@ namespace AccountingSystem.Application.Mappers
             {
                 Id = c.Id,
                 Name = c.Name,
+                NIP = c.NIP,
                 Email = c.Email,
                 Street = c.Street,
                 City = c.City,

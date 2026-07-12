@@ -1,6 +1,4 @@
 using AccountingSystem.Domain.Enums;
-using System;
-using System.Collections.Generic;
 
 namespace AccountingSystem.Domain.Entities
 {
@@ -27,8 +25,10 @@ namespace AccountingSystem.Domain.Entities
         public int CustomerId { get; set; }
 
         public Customer Customer { get; set; }
+
         // SNAPSHOT CUSTOMER
         public string CustomerName { get; set; }
+        public string CustomerNIP { get; set; }
         public string CustomerEmail { get; set; }
         public string CustomerStreet { get; set; }
         public string CustomerZipCode { get; set; }

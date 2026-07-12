@@ -36,6 +36,7 @@ namespace AccountingSystem.Application.Services
             var customer = new Customer
             {
                 Name = request.Name,
+                NIP = request.NIP,
                 Email = request.Email,
                 City = request.City,
                 Street = request.Street,
@@ -92,6 +93,7 @@ namespace AccountingSystem.Application.Services
             }
 
             existing.Name = request.Name;
+            existing.NIP = request.NIP;
             existing.Email = request.Email;
             existing.City = request.City;
             existing.Street = request.Street;
@@ -139,6 +141,7 @@ namespace AccountingSystem.Application.Services
                 {
                     Id = c.Id,
                     Name = c.Name,
+                    NIP = c.NIP,
                     Email = c.Email,
                     City = c.City,
                     Street = c.Street,
@@ -159,6 +162,7 @@ namespace AccountingSystem.Application.Services
             {
                 Id = customer.Id,
                 Name = customer.Name,
+                NIP = customer.NIP,
                 Email = customer.Email,
                 City = customer.City,
                 Street = customer.Street,

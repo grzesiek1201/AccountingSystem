@@ -18,8 +18,9 @@ namespace AccountingSystem.Application.Mappers
                 Customer = new CustomerResponse
                 {
                     Id = q.CustomerId,
-                    Email = q.CustomerEmail,
                     Name = q.CustomerName,
+                    NIP = q.CustomerNIP,
+                    Email = q.CustomerEmail,
                     Street = q.CustomerStreet,
                     ZipCode = q.CustomerZipCode,
                     City = q.CustomerCity

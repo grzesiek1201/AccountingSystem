@@ -20,6 +20,7 @@ namespace AccountingSystem.Domain.Entities
 
         // SNAPSHOT CUSTOMER
         public string CustomerName { get; set; }
+        public string CustomerNIP { get; set; }
         public string CustomerEmail { get; set; }
         public string CustomerStreet { get; set; }
         public string CustomerZipCode { get; set; }
