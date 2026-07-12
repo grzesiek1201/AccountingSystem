@@ -1,5 +1,6 @@
 ﻿using AccountingSystem.Application.Converters;
 using AccountingSystem.Application.DTOs.Orders;
+using AccountingSystem.Application.Factories;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -22,8 +23,10 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<ICustomerRepository> _customerRepo;
         private readonly Mock<IProductRepository> _productRepo;
         private readonly Mock<IQuotationRepository> _quotationRepoMock;
-        private readonly Mock<OrderResponseMapper> _orderMapperMock;
-        private readonly Mock<QuotationToOrderConverter> _quotationToOrderMapperMock;
+
+        private readonly OrderFactory _factory;
+        private readonly OrderResponseMapper _orderMapper;
+        private readonly QuotationToOrderConverter _quotationToOrderMapper;
 
         private readonly OrderValidator _validator;
         private readonly OrderService _service;
@@ -37,19 +40,35 @@ namespace AccountingSystem.Tests.ServicesTests
             _customerRepo = new Mock<ICustomerRepository>();
             _productRepo = new Mock<IProductRepository>();
             _quotationRepoMock = new Mock<IQuotationRepository>();
-            _orderMapperMock = new Mock<OrderResponseMapper>();
-            _quotationToOrderMapperMock = new Mock<QuotationToOrderConverter>();
 
             _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
                 .Returns("O-2026-0001");
 
+            _factory = new OrderFactory(_seqMock.Object);
+
+            _orderMapper = new OrderResponseMapper();
+            _quotationToOrderMapper = new QuotationToOrderConverter();
+
             _customerRepo.Setup(x => x.GetById(1))
-                .Returns(new Customer { Id = 1, Name = "Test" });
+                .Returns(new Customer
+                {
+                    Id = 1,
+                    Name = "Test",
+                    Email = "test@test.com",
+                    City = "X",
+                    Street = "Y",
+                    ZipCode = "00-000"
+                });
 
             _productRepo.Setup(x => x.GetByIds(It.IsAny<List<int>>()))
                 .Returns(new List<Product>
                 {
-                    new Product { Id = 1, Name = "Test", Price = 100m }
+                    new Product
+                    {
+                        Id = 1,
+                        Name = "Test",
+                        Price = 100m
+                    }
                 });
 
             _validator = new OrderValidator();
@@ -59,12 +78,13 @@ namespace AccountingSystem.Tests.ServicesTests
                 _validator,
                 _uowMock.Object,
                 _loggerMock.Object,
+                _factory,
                 _seqMock.Object,
                 _customerRepo.Object,
                 _productRepo.Object,
-                _orderMapperMock.Object,
+                _orderMapper,
                 _quotationRepoMock.Object,
-                _quotationToOrderMapperMock.Object
+                _quotationToOrderMapper
             );
         }
 
@@ -113,7 +133,6 @@ namespace AccountingSystem.Tests.ServicesTests
             };
         }
 
-        // ================= ADD =================
 
         [Fact]
         public void AddOrder_Valid_ShouldReturnSuccess()
@@ -131,6 +150,7 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock.Verify(u => u.Save(), Times.Once);
         }
 
+
         [Fact]
         public void AddOrder_Invalid_ShouldReturnInvalidData()
         {
@@ -147,7 +167,6 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
-        // ================= EDIT =================
 
         [Fact]
         public void EditOrder_NotFound_ShouldReturnNotFound()
@@ -162,10 +181,15 @@ namespace AccountingSystem.Tests.ServicesTests
             Assert.Equal(OrderEditResult.NotFound, result.Result);
         }
 
+
         [Fact]
         public void EditOrder_Archived_ShouldReturnOrderArchived()
         {
-            var order = new Order { Id = 1, IsOrderArchived = true };
+            var order = new Order
+            {
+                Id = 1,
+                IsOrderArchived = true
+            };
 
             var request = CreateUpdateRequest();
 
@@ -180,10 +204,14 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock.Verify(u => u.Save(), Times.Never);
         }
 
+
         [Fact]
         public void EditOrder_Valid_ShouldReturnSuccess()
         {
-            var order = new Order { Id = 1 };
+            var order = new Order
+            {
+                Id = 1
+            };
 
             var request = CreateUpdateRequest();
 
@@ -201,12 +229,14 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock.Verify(u => u.Save(), Times.Once);
         }
 
-        // ================= ARCHIVE =================
 
         [Fact]
         public void ArchiveOrder_Existing_ShouldReturnSuccess()
         {
-            var order = new Order { Id = 1 };
+            var order = new Order
+            {
+                Id = 1
+            };
 
             _repoMock.Setup(r => r.GetById(order.Id))
                 .Returns(order);
@@ -216,12 +246,14 @@ namespace AccountingSystem.Tests.ServicesTests
             Assert.Equal(ArchiveOrderResult.Success, result);
         }
 
-        // ================= READ =================
 
         [Fact]
         public void FindOrder_Existing_ShouldReturnOrder()
         {
-            var order = new Order { Id = 1 };
+            var order = new Order
+            {
+                Id = 1
+            };
 
             _repoMock.Setup(r => r.GetById(order.Id))
                 .Returns(order);
@@ -232,11 +264,16 @@ namespace AccountingSystem.Tests.ServicesTests
             Assert.Equal(order.Id, result.Id);
         }
 
+
         [Fact]
         public void GetAllOrders_ShouldReturnAllOrders()
         {
             _repoMock.Setup(r => r.GetAll())
-                .Returns(new List<Order> { new Order(), new Order() });
+                .Returns(new List<Order>
+                {
+                    new Order(),
+                    new Order()
+                });
 
             var result = _service.GetAllOrders();
 

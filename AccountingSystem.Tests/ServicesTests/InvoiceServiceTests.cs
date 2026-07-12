@@ -1,5 +1,6 @@
 ﻿using AccountingSystem.Application.Converters;
 using AccountingSystem.Application.DTOs.Invoices;
+using AccountingSystem.Application.Factories;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -23,7 +24,8 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<ICustomerRepository> _customerRepo;
         private readonly Mock<IProductRepository> _productRepo;
         private readonly Mock<IOrderRepository> _orderRepoMock;
-        private readonly Mock<IInvoiceStatusCalculator> _statusCalcMock;
+        private readonly Mock<IInvoiceStatusCalculator> _statusCalculatorMock;
+        private readonly InvoiceFactory _factory;
 
         private readonly InvoiceResponseMapper _mapper;
         private readonly OrderToInvoiceConverter _orderToInvoiceMapper;
@@ -38,10 +40,13 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<InvoiceService>>();
             _seqMock = new Mock<INumberSequenceService>();
+            _factory = new InvoiceFactory(_seqMock.Object);
             _customerRepo = new Mock<ICustomerRepository>();
             _productRepo = new Mock<IProductRepository>();
             _orderRepoMock = new Mock<IOrderRepository>();
-            _statusCalcMock = new Mock<IInvoiceStatusCalculator>();
+            _statusCalculatorMock = new Mock<IInvoiceStatusCalculator>();
+
+
 
             _mapper = new InvoiceResponseMapper();
             _orderToInvoiceMapper = new OrderToInvoiceConverter();
@@ -78,14 +83,15 @@ namespace AccountingSystem.Tests.ServicesTests
                 _validator,
                 _uowMock.Object,
                 _loggerMock.Object,
+                _factory,
                 _seqMock.Object,
                 _customerRepo.Object,
                 _productRepo.Object,
                 _mapper,
                 _orderRepoMock.Object,
                 _orderToInvoiceMapper,
-                _statusCalcMock.Object
-            );
+                _statusCalculatorMock.Object
+                );
         }
 
         private CreateInvoiceRequest CreateValidRequest()

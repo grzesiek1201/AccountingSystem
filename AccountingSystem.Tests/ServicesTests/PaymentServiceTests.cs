@@ -1,107 +1,292 @@
-﻿using AccountingSystem.Application.DTOs.Invoices;
-using AccountingSystem.Application.DTOs.Payments;
+﻿using AccountingSystem.Application.DTOs.Payments;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Repositories;
+using AccountingSystem.Application.Services;
 using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
 using Microsoft.Extensions.Logging;
+using Moq;
+using Xunit;
 
-namespace AccountingSystem.Application.Services
+namespace AccountingSystem.Tests.ServicesTests
 {
-    public class PaymentService : IPaymentService
+    public class PaymentServiceTests
     {
-        private readonly IPaymentRepository _paymentRepository;
-        private readonly IInvoiceRepository _invoiceRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<PaymentService> _logger;
-        private readonly IInvoiceStatusCalculator _statusCalculator;
+        private readonly Mock<IPaymentRepository> _paymentRepoMock;
+        private readonly Mock<IInvoiceRepository> _invoiceRepoMock;
+        private readonly Mock<IUnitOfWork> _uowMock;
+        private readonly Mock<ILogger<PaymentService>> _loggerMock;
+        private readonly Mock<IInvoiceStatusCalculator> _statusCalculatorMock;
 
-        public PaymentService(
-            IPaymentRepository paymentRepository,
-            IInvoiceRepository invoiceRepository,
-            IUnitOfWork unitOfWork,
-            ILogger<PaymentService> logger,
-            IInvoiceStatusCalculator statusCalculator)
+        private readonly PaymentService _service;
+
+
+        public PaymentServiceTests()
         {
-            _paymentRepository = paymentRepository;
-            _invoiceRepository = invoiceRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
-            _statusCalculator = statusCalculator;
+            _paymentRepoMock = new Mock<IPaymentRepository>();
+            _invoiceRepoMock = new Mock<IInvoiceRepository>();
+            _uowMock = new Mock<IUnitOfWork>();
+            _loggerMock = new Mock<ILogger<PaymentService>>();
+            _statusCalculatorMock = new Mock<IInvoiceStatusCalculator>();
+
+
+            _service = new PaymentService(
+                _paymentRepoMock.Object,
+                _invoiceRepoMock.Object,
+                _uowMock.Object,
+                _loggerMock.Object,
+                _statusCalculatorMock.Object
+            );
         }
 
-        public PaymentAddResponse AddPayment(CreatePaymentRequest request)
+
+        private CreatePaymentRequest CreateRequest(decimal amount = 100)
         {
-            _logger.LogInformation("AddPayment InvoiceId={InvoiceId}", request.InvoiceId);
+            return new CreatePaymentRequest
+            {
+                InvoiceId = 1,
+                Amount = amount
+            };
+        }
 
-            var invoice = _invoiceRepository.GetById(request.InvoiceId);
 
-            if (invoice == null)
-                return new PaymentAddResponse { Result = PaymentAddResult.InvoiceNotFound };
+        private Invoice CreateInvoice()
+        {
+            return new Invoice
+            {
+                Id = 1,
+                TotalAmount = 500,
+                Status = InvoiceStatus.Issued
+            };
+        }
 
-            if (invoice.IsInvoiceArchived)
-                return new PaymentAddResponse { Result = PaymentAddResult.InvoiceArchived };
 
-            if (request.Amount <= 0)
-                return new PaymentAddResponse { Result = PaymentAddResult.InvalidAmount };
 
-            var alreadyPaid = _paymentRepository.GetTotalPaidForInvoice(request.InvoiceId);
-            var remaining = invoice.TotalAmount - alreadyPaid;
+        [Fact]
+        public void AddPayment_Valid_ShouldReturnSuccess()
+        {
+            var invoice = CreateInvoice();
 
-            if (request.Amount > remaining)
-                return new PaymentAddResponse { Result = PaymentAddResult.AmountExceedsRemaining };
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(invoice);
 
+            _paymentRepoMock
+                .Setup(x => x.GetTotalPaidForInvoice(1))
+                .Returns(0);
+
+
+            var result = _service.AddPayment(CreateRequest());
+
+
+            Assert.Equal(
+                PaymentAddResult.Success,
+                result.Result);
+
+
+            _paymentRepoMock.Verify(
+                x => x.Add(It.IsAny<Payment>()),
+                Times.Once);
+
+
+            _uowMock.Verify(
+                x => x.Save(),
+                Times.Once);
+        }
+
+
+
+        [Fact]
+        public void AddPayment_InvoiceNotFound_ShouldReturnInvoiceNotFound()
+        {
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns((Invoice)null);
+
+
+            var result = _service.AddPayment(CreateRequest());
+
+
+            Assert.Equal(
+                PaymentAddResult.InvoiceNotFound,
+                result.Result);
+        }
+
+
+
+        [Fact]
+        public void AddPayment_InvoiceArchived_ShouldReturnInvoiceArchived()
+        {
+            var invoice = CreateInvoice();
+            invoice.IsInvoiceArchived = true;
+
+
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(invoice);
+
+
+            var result = _service.AddPayment(CreateRequest());
+
+
+            Assert.Equal(
+                PaymentAddResult.InvoiceArchived,
+                result.Result);
+        }
+
+
+
+        [Fact]
+        public void AddPayment_InvalidAmount_ShouldReturnInvalidAmount()
+        {
+            var invoice = CreateInvoice();
+
+
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(invoice);
+
+
+            var result = _service.AddPayment(
+                CreateRequest(0));
+
+
+            Assert.Equal(
+                PaymentAddResult.InvalidAmount,
+                result.Result);
+        }
+
+
+
+        [Fact]
+        public void AddPayment_AmountExceedsRemaining_ShouldReturnAmountExceedsRemaining()
+        {
+            var invoice = CreateInvoice();
+
+
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(invoice);
+
+
+            _paymentRepoMock
+                .Setup(x => x.GetTotalPaidForInvoice(1))
+                .Returns(450);
+
+
+            var result = _service.AddPayment(
+                CreateRequest(100));
+
+
+            Assert.Equal(
+                PaymentAddResult.AmountExceedsRemaining,
+                result.Result);
+        }
+
+
+
+        [Fact]
+        public void DeletePayment_NotFound_ShouldReturnNotFound()
+        {
+            _paymentRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns((Payment)null);
+
+
+            var result = _service.DeletePayment(1);
+
+
+            Assert.Equal(
+                PaymentDeleteResult.NotFound,
+                result);
+        }
+
+
+
+        [Fact]
+        public void DeletePayment_Valid_ShouldDelete()
+        {
             var payment = new Payment
             {
-                InvoiceId = request.InvoiceId,
-                Amount = request.Amount,
-                PaymentDate = DateTime.UtcNow,
-                Status = PaymentStatus.Paid
+                Id = 1,
+                InvoiceId = 1,
+                Amount = 100
             };
 
-            _paymentRepository.Add(payment);
 
-            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(request.InvoiceId);
-            _statusCalculator.Recalculate(invoice, totalPaid);
+            var invoice = CreateInvoice();
 
-            _unitOfWork.Save();
 
-            return new PaymentAddResponse { Result = PaymentAddResult.Success };
+            _paymentRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(payment);
+
+
+            _invoiceRepoMock
+                .Setup(x => x.GetById(1))
+                .Returns(invoice);
+
+
+            _paymentRepoMock
+                .Setup(x => x.GetTotalPaidForInvoice(1))
+                .Returns(0);
+
+
+
+            var result = _service.DeletePayment(1);
+
+
+
+            Assert.Equal(
+                PaymentDeleteResult.Success,
+                result);
+
+
+            _paymentRepoMock.Verify(
+                x => x.Delete(payment),
+                Times.Once);
+
+
+            _uowMock.Verify(
+                x => x.Save(),
+                Times.Once);
         }
 
-        public IEnumerable<PaymentResponse> GetPaymentsForInvoice(int invoiceId)
+
+
+        [Fact]
+        public void GetPaymentsForInvoice_ShouldReturnPayments()
         {
-            return _paymentRepository.GetByInvoiceId(invoiceId)
-                .Select(p => new PaymentResponse
+            var payments = new List<Payment>
+            {
+                new Payment
                 {
-                    Id = p.Id,
-                    Amount = p.Amount,
-                    PaymentDate = p.PaymentDate,
-                    Status = p.Status,
-                    InvoiceId = p.InvoiceId
-                });
-        }
+                    Id = 1,
+                    InvoiceId = 1,
+                    Amount = 100,
+                    Status = PaymentStatus.Paid
+                },
+                new Payment
+                {
+                    Id = 2,
+                    InvoiceId = 1,
+                    Amount = 200,
+                    Status = PaymentStatus.Paid
+                }
+            };
 
-        public PaymentDeleteResult DeletePayment(int paymentId)
-        {
-            var payment = _paymentRepository.GetById(paymentId);
 
-            if (payment == null)
-                return PaymentDeleteResult.NotFound;
+            _paymentRepoMock
+                .Setup(x => x.GetByInvoiceId(1))
+                .Returns(payments);
 
-            var invoice = _invoiceRepository.GetById(payment.InvoiceId);
 
-            if (invoice == null)
-                return PaymentDeleteResult.NotFound;
 
-            _paymentRepository.Delete(payment);
+            var result = _service.GetPaymentsForInvoice(1);
 
-            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(payment.InvoiceId);
-            _statusCalculator.Recalculate(invoice, totalPaid);
 
-            _unitOfWork.Save();
 
-            return PaymentDeleteResult.Success;
+            Assert.Equal(2, result.Count());
         }
     }
 }

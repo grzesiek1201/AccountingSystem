@@ -3,82 +3,86 @@ using AccountingSystem.Domain.Entities;
 using Xunit;
 using System.Collections.Generic;
 
-public class ProductValidatorTests
+
+namespace AccountingSystem.Tests.ServicesTests
 {
-    private readonly ProductValidator _validator = new();
-
-    private Product CreateValidProduct()
+    public class ProductValidatorTests
     {
-        return new Product
+        private readonly ProductValidator _validator = new();
+
+        private Product CreateValidProduct()
         {
-            Id = 2,
-            Name = "Chocolate GOLD",
-            Price = 100,
-            CategoryId = 1,
-            IsProductArchived = false
-        };
-    }
+            return new Product
+            {
+                Id = 2,
+                Name = "Chocolate GOLD",
+                Price = 100,
+                CategoryId = 1,
+                IsProductArchived = false
+            };
+        }
 
-    [Fact]
-    public void Validate_ValidProduct_ShouldReturnValidResult()
-    {
-        var product = CreateValidProduct();
-
-        var result = _validator.Validate(product, new List<Product>());
-
-        Assert.True(result.IsValid);
-        Assert.Empty(result.Errors);
-    }
-
-    [Fact]
-    public void Validate_EmptyName_ShouldContainEmptyNameError()
-    {
-        var product = CreateValidProduct();
-        product.Name = "";
-
-        var result = _validator.Validate(product, new List<Product>());
-
-        Assert.Contains(ProductValidationError.EmptyName, result.Errors);
-    }
-
-    [Fact]
-    public void Validate_NameTooLong_ShouldContainNameTooLongError()
-    {
-        var product = CreateValidProduct();
-        product.Name = new string('A', 70);
-
-        var result = _validator.Validate(product, new List<Product>());
-
-        Assert.Contains(ProductValidationError.NameTooLong, result.Errors);
-    }
-
-    [Fact]
-    public void Validate_DuplicateName_ShouldContainDuplicateNameError()
-    {
-        var existing = new Product
+        [Fact]
+        public void Validate_ValidProduct_ShouldReturnValidResult()
         {
-            Id = 1,
-            Name = "Chocolate GOLD",
-            Price = 50,
-            CategoryId = 1
-        };
+            var product = CreateValidProduct();
 
-        var product = CreateValidProduct();
-        product.Id = 2;
+            var result = _validator.Validate(product, new List<Product>());
 
-        var result = _validator.Validate(product, new List<Product> { existing });
+            Assert.True(result.IsValid);
+            Assert.Empty(result.Errors);
+        }
 
-        Assert.Contains(ProductValidationError.DuplicateName, result.Errors);
-    }
+        [Fact]
+        public void Validate_EmptyName_ShouldContainEmptyNameError()
+        {
+            var product = CreateValidProduct();
+            product.Name = "";
 
-    [Fact]
-    public void Validate_InvalidPrice_ShouldContainInvalidPriceError()
-    {
-        var product = CreateValidProduct();
-        product.Price = -10;
+            var result = _validator.Validate(product, new List<Product>());
 
-        var result = _validator.Validate(product, new List<Product>());
+            Assert.Contains(ProductValidationError.EmptyName, result.Errors);
+        }
 
-        Assert.Contains(ProductValidationError.InvalidPrice, result.Errors);
+        [Fact]
+        public void Validate_NameTooLong_ShouldContainNameTooLongError()
+        {
+            var product = CreateValidProduct();
+            product.Name = new string('A', 70);
+
+            var result = _validator.Validate(product, new List<Product>());
+
+            Assert.Contains(ProductValidationError.NameTooLong, result.Errors);
+        }
+
+        [Fact]
+        public void Validate_DuplicateName_ShouldContainDuplicateNameError()
+        {
+            var existing = new Product
+            {
+                Id = 1,
+                Name = "Chocolate GOLD",
+                Price = 50,
+                CategoryId = 1
+            };
+
+            var product = CreateValidProduct();
+            product.Id = 2;
+
+            var result = _validator.Validate(product, new List<Product> { existing });
+
+            Assert.Contains(ProductValidationError.DuplicateName, result.Errors);
+        }
+
+        [Fact]
+        public void Validate_InvalidPrice_ShouldContainInvalidPriceError()
+        {
+            var product = CreateValidProduct();
+            product.Price = -10;
+
+            var result = _validator.Validate(product, new List<Product>());
+
+            Assert.Contains(ProductValidationError.InvalidPrice, result.Errors);
+        }
     }
 }

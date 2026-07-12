@@ -1,5 +1,5 @@
-﻿using AccountingSystem.Application.Converters;
-using AccountingSystem.Application.DTOs.Quotations;
+﻿using AccountingSystem.Application.DTOs.Quotations;
+using AccountingSystem.Application.Factories;
 using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Application.Mappers;
 using AccountingSystem.Application.Repositories;
@@ -22,8 +22,8 @@ namespace AccountingSystem.Tests.ServicesTests
         private readonly Mock<ICustomerRepository> _customerRepo;
         private readonly Mock<IProductRepository> _productRepo;
 
+        private readonly QuotationFactory _factory;
         private readonly QuotationResponseMapper _mapper;
-        private readonly QuotationToOrderConverter _quotationToOrderMapper;
 
         private readonly QuotationValidator _validator;
         private readonly QuotationService _service;
@@ -34,32 +34,46 @@ namespace AccountingSystem.Tests.ServicesTests
             _uowMock = new Mock<IUnitOfWork>();
             _loggerMock = new Mock<ILogger<QuotationService>>();
             _seqMock = new Mock<INumberSequenceService>();
-            _customerRepo = new Mock<ICustomerRepository>();
-            _productRepo = new Mock<IProductRepository>();
-
-            _mapper = new QuotationResponseMapper();
-            _quotationToOrderMapper = new QuotationToOrderConverter();
 
             _seqMock.Setup(x => x.GetNext(It.IsAny<DocumentType>()))
                 .Returns("Q-2026-0001");
 
+            _factory = new QuotationFactory(_seqMock.Object);
+
+            _customerRepo = new Mock<ICustomerRepository>();
+            _productRepo = new Mock<IProductRepository>();
+
+            _mapper = new QuotationResponseMapper();
+            _validator = new QuotationValidator();
+
             _customerRepo.Setup(x => x.GetById(1))
-                .Returns(new Customer { Id = 1, Name = "Test" });
+                .Returns(new Customer
+                {
+                    Id = 1,
+                    Name = "Test",
+                    Email = "test@test.com",
+                    City = "X",
+                    Street = "Y",
+                    ZipCode = "00-000"
+                });
 
             _productRepo.Setup(x => x.GetByIds(It.IsAny<List<int>>()))
                 .Returns(new List<Product>
                 {
-                    new Product { Id = 1, Name = "Test", Price = 100m }
+                    new Product
+                    {
+                        Id = 1,
+                        Name = "Test",
+                        Price = 100m
+                    }
                 });
-
-            _validator = new QuotationValidator();
 
             _service = new QuotationService(
                 _repoMock.Object,
                 _validator,
                 _uowMock.Object,
                 _loggerMock.Object,
-                _seqMock.Object,
+                _factory,
                 _customerRepo.Object,
                 _productRepo.Object,
                 _mapper
@@ -170,7 +184,11 @@ namespace AccountingSystem.Tests.ServicesTests
             var req = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(req.Id))
-                .Returns(new Quotation { Id = 1, IsQuotationArchived = true });
+                .Returns(new Quotation
+                {
+                    Id = 1,
+                    IsQuotationArchived = true
+                });
 
             var result = _service.EditQuotation(req);
 
