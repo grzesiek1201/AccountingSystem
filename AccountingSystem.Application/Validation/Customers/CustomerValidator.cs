@@ -1,5 +1,4 @@
 using AccountingSystem.Domain.Entities;
-using System.Linq;
 
 namespace AccountingSystem.Application.Validation.Customers
 {

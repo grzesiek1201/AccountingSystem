@@ -21,15 +21,38 @@ namespace AccountingSystem.Application.Validation.Products
                     result.Errors.Add(ProductValidationError.DuplicateName);
             }
 
-            if (product.Price <= 0)
+            if (string.IsNullOrWhiteSpace(product.ProductCode))
             {
+                result.Errors.Add(ProductValidationError.EmptyProductCode);
+            }
+            else
+            {
+                if (product.ProductCode.Length > 64)
+                    result.Errors.Add(ProductValidationError.ProductCodeTooLong);
+
+                if (products.Exists(x => x.ProductCode == product.ProductCode && x.Id != product.Id))
+                    result.Errors.Add(ProductValidationError.DuplicateProductCode);
+            }
+
+            if (product.Price <= 0)
+                {
                 result.Errors.Add(ProductValidationError.InvalidPrice);
+                }
+
+            if (product.VatRate < 0 || product.VatRate > 100)
+                {
+                result.Errors.Add(ProductValidationError.InvalidVatRate);
+                }
+
+            if (!Enum.IsDefined(typeof(ProductUnit), product.Unit))
+            {
+                result.Errors.Add(ProductValidationError.InvalidUnit);
             }
 
             if (product.CategoryId <= 0)
-            {
+                {
                 result.Errors.Add(ProductValidationError.EmptyCategory);
-            }
+                }
 
             return result;
         }
