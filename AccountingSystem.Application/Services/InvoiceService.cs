@@ -28,6 +28,7 @@ namespace AccountingSystem.Application.Services
         private readonly OrderToInvoiceConverter _orderToInvoiceMapper;
         private readonly IInvoiceStatusCalculator _statusCalculator;
 
+
         public InvoiceService(
             IInvoiceRepository invoiceRepository,
             IPaymentRepository paymentRepository,
@@ -58,178 +59,374 @@ namespace AccountingSystem.Application.Services
             _statusCalculator = statusCalculator;
         }
 
+
         public InvoiceAddResponse AddInvoice(CreateInvoiceRequest request)
         {
             var customer = _customerRepository.GetById(request.CustomerId);
+
             if (customer == null)
-                return new InvoiceAddResponse { Result = InvoiceAddResult.InvalidData };
+                return new InvoiceAddResponse
+                {
+                    Result = InvoiceAddResult.InvalidData
+                };
+
 
             var productIds = request.Items?
-                .Select(i => i.ProductId)
+                .Select(x => x.ProductId)
                 .ToList() ?? new List<int>();
+
 
             var products = _productRepository
                 .GetByIds(productIds)
-                .ToDictionary(p => p.Id);
+                .ToDictionary(x => x.Id);
+
 
             var invoice = _invoiceFactory.Create(
                 request,
                 customer,
                 products);
-        
+
+
             var validation = _validator.Validate(
                 invoice,
                 _invoiceRepository.GetAll());
 
+
             if (!validation.IsValid)
+            {
                 return new InvoiceAddResponse
                 {
                     Result = InvoiceAddResult.InvalidData,
                     Errors = validation.Errors
                 };
+            }
+
 
             _invoiceRepository.Add(invoice);
             _unitOfWork.Save();
 
-            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(invoice.Id);
-            _statusCalculator.Recalculate(invoice, totalPaid);
 
-            _logger.LogInformation("Invoice created: {Id}", invoice.Id);
+            _logger.LogInformation(
+                "Invoice created: {Id}",
+                invoice.Id);
 
-            return new InvoiceAddResponse { Result = InvoiceAddResult.Success };
+
+            return new InvoiceAddResponse
+            {
+                Result = InvoiceAddResult.Success
+            };
         }
+
 
         public InvoiceAddResponse CreateInvoiceFromOrder(int orderId)
         {
             var order = _orderRepository.GetById(orderId);
 
             if (order == null || order.IsOrderArchived)
-                return new InvoiceAddResponse { Result = InvoiceAddResult.InvalidData };
+                return new InvoiceAddResponse
+                {
+                    Result = InvoiceAddResult.InvalidData
+                };
+
 
             var invoice = _orderToInvoiceMapper.Map(order);
 
-            if (invoice == null)
-                return new InvoiceAddResponse { Result = InvoiceAddResult.InvalidData };
 
-            invoice.InvoiceNumber = _numberSequenceService.GetNext(DocumentType.Invoice);
-            invoice.Status = InvoiceStatus.Draft;
+            if (invoice == null)
+                return new InvoiceAddResponse
+                {
+                    Result = InvoiceAddResult.InvalidData
+                };
+
+
+            invoice.InvoiceNumber =
+                _numberSequenceService.GetNext(DocumentType.Invoice);
+
             invoice.DateCreated = DateTime.UtcNow;
 
-            var validation = _validator.Validate(invoice, _invoiceRepository.GetAll());
+
+            var validation =
+                _validator.Validate(
+                    invoice,
+                    _invoiceRepository.GetAll());
+
 
             if (!validation.IsValid)
+            {
                 return new InvoiceAddResponse
                 {
                     Result = InvoiceAddResult.InvalidData,
                     Errors = validation.Errors
                 };
+            }
 
-            _invoiceRepository.Add(invoice);
-            _unitOfWork.Save();
 
-            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(invoice.Id);
-            _statusCalculator.Recalculate(invoice, totalPaid);
+            try
+            {
+                _unitOfWork.BeginTransaction();
 
-            return new InvoiceAddResponse { Result = InvoiceAddResult.Success };
+                _invoiceRepository.Add(invoice);
+
+                order.ConvertToInvoice();
+
+                _orderRepository.Update(order);
+
+                _unitOfWork.Save();
+
+                _unitOfWork.Commit();
+
+                return new InvoiceAddResponse
+                {
+                    Result = InvoiceAddResult.Success
+                };
+            }
+            catch (Exception ex)
+            {
+                _unitOfWork.Rollback();
+
+                _logger.LogError(
+                    ex,
+                    "Error while converting order {OrderId} to invoice",
+                    orderId);
+
+                return new InvoiceAddResponse
+                {
+                    Result = InvoiceAddResult.InvalidData
+                };
+            }
         }
+
+
 
         public InvoiceEditResponse EditInvoice(UpdateInvoiceRequest request)
         {
             var existing = _invoiceRepository.GetById(request.Id);
 
+
             if (existing == null)
-                return new InvoiceEditResponse { Result = InvoiceEditResult.NotFound };
+                return new InvoiceEditResponse
+                {
+                    Result = InvoiceEditResult.NotFound
+                };
+
 
             if (existing.IsInvoiceArchived)
-                return new InvoiceEditResponse { Result = InvoiceEditResult.InvoiceArchived };
+                return new InvoiceEditResponse
+                {
+                    Result = InvoiceEditResult.InvoiceArchived
+                };
+
 
             if (request.Items != null && request.Items.Any())
             {
-                var domainItems = request.Items.Select(x => new InvoiceItem
-                {
-                    ProductId = x.ProductId,
-                    Quantity = x.Quantity,
-                    DiscountPercent = x.DiscountPercent
-                }).ToList();
+                var items = request.Items
+                    .Select(x => new InvoiceItem
+                    {
+                        ProductId = x.ProductId,
+                        Quantity = x.Quantity,
+                        DiscountPercent = x.DiscountPercent
+                    })
+                    .ToList();
 
-                var productIds = domainItems.Select(i => i.ProductId).ToList();
-                var products = _productRepository.GetByIds(productIds).ToDictionary(p => p.Id);
 
-                existing.Items = ItemSnapshotHelper.SnapshotInvoiceItems(domainItems, products);
+                var productIds = items
+                    .Select(x => x.ProductId)
+                    .ToList();
+
+
+                var products =
+                    _productRepository
+                    .GetByIds(productIds)
+                    .ToDictionary(x => x.Id);
+
+
+                existing.Items =
+                    ItemSnapshotHelper
+                    .SnapshotInvoiceItems(items, products);
             }
 
-            if (request.CustomerId != 0 && request.CustomerId != existing.CustomerId)
+
+
+            if (request.CustomerId != 0 &&
+                request.CustomerId != existing.CustomerId)
             {
-                var customer = _customerRepository.GetById(request.CustomerId);
+                var customer =
+                    _customerRepository.GetById(request.CustomerId);
+
+
                 if (customer == null)
-                    return new InvoiceEditResponse { Result = InvoiceEditResult.InvalidData };
+                    return new InvoiceEditResponse
+                    {
+                        Result = InvoiceEditResult.InvalidData
+                    };
+
 
                 existing.ApplyCustomerSnapshot(customer);
             }
 
-            if (request.Status != default)
-                existing.Status = request.Status;
 
-            var validation = _validator.Validate(
-                existing,
-                _invoiceRepository.GetAll().Where(x => x.Id != existing.Id).ToList(),
-                isEdit: true);
+
+            var validation =
+                _validator.Validate(
+                    existing,
+                    _invoiceRepository
+                    .GetAll()
+                    .Where(x => x.Id != existing.Id)
+                    .ToList(),
+                    isEdit: true);
+
+
 
             if (!validation.IsValid)
-                return new InvoiceEditResponse { Result = InvoiceEditResult.InvalidData };
+                return new InvoiceEditResponse
+                {
+                    Result = InvoiceEditResult.InvalidData
+                };
+
 
             _invoiceRepository.Update(existing);
             _unitOfWork.Save();
 
-            var totalPaid = _paymentRepository.GetTotalPaidForInvoice(existing.Id);
-            _statusCalculator.Recalculate(existing, totalPaid);
 
-            return new InvoiceEditResponse { Result = InvoiceEditResult.Success };
+            return new InvoiceEditResponse
+            {
+                Result = InvoiceEditResult.Success
+            };
         }
 
-        public InvoiceStatusResponse ChangeInvoiceStatus(int id, StatusInvoiceRequest request)
+
+
+        public InvoiceStatusResponse IssueInvoice(int id)
         {
             var invoice = _invoiceRepository.GetById(id);
 
+
             if (invoice == null)
-                return new InvoiceStatusResponse { Result = InvoiceStatusResult.NotFound };
+                return new InvoiceStatusResponse
+                {
+                    Result = InvoiceOperationResult.NotFound
+                };
 
-            if (invoice.IsInvoiceArchived)
-                return new InvoiceStatusResponse { Result = InvoiceStatusResult.InvalidOperation };
 
-            if (invoice.Status == InvoiceStatus.Overdue)
-                _logger.LogWarning("Invoice {Id} is overdue. Manual override.", id);
+            try
+            {
+                invoice.Issue();
+            }
+            catch (InvalidOperationException)
+            {
+                return new InvoiceStatusResponse
+                {
+                    Result = InvoiceOperationResult.InvalidOperation
+                };
+            }
 
-            invoice.Status = request.Status;
 
             _invoiceRepository.Update(invoice);
             _unitOfWork.Save();
 
-            return new InvoiceStatusResponse { Result = InvoiceStatusResult.Success };
+
+            return new InvoiceStatusResponse
+            {
+                Result = InvoiceOperationResult.Success
+            };
         }
 
+
+
+        public InvoiceStatusResponse CancelInvoice(int id)
+        {
+            var invoice = _invoiceRepository.GetById(id);
+
+
+            if (invoice == null)
+                return new InvoiceStatusResponse
+                {
+                    Result = InvoiceOperationResult.NotFound
+                };
+
+
+            var payments =
+                _paymentRepository
+                .GetByInvoiceId(id);
+
+
+            if (payments.Any(x => x.Status == PaymentStatus.Paid))
+            {
+                return new InvoiceStatusResponse
+                {
+                    Result = InvoiceOperationResult.InvalidOperation
+                };
+            }
+
+
+            try
+            {
+                invoice.Cancel();
+            }
+            catch (InvalidOperationException)
+            {
+                return new InvoiceStatusResponse
+                {
+                    Result = InvoiceOperationResult.InvalidOperation
+                };
+            }
+
+
+            _invoiceRepository.Update(invoice);
+            _unitOfWork.Save();
+
+
+            return new InvoiceStatusResponse
+            {
+                Result = InvoiceOperationResult.Success
+            };
+        }
+
+
+
+        public ArchiveInvoiceResult ArchiveInvoice(int id)
+        {
+            var invoice = _invoiceRepository.GetById(id);
+
+
+            if (invoice == null)
+                return ArchiveInvoiceResult.NotFound;
+
+
+            try
+            {
+                invoice.Archive();
+            }
+            catch (InvalidOperationException)
+            {
+                return ArchiveInvoiceResult.InvalidOperation;
+            }
+
+
+            _invoiceRepository.Update(invoice);
+            _unitOfWork.Save();
+
+
+            return ArchiveInvoiceResult.Success;
+        }
+
+
+
         public List<InvoiceResponse> GetAllInvoices()
-            => _invoiceRepository.GetAll().Select(_mapper.Map).ToList();
+            => _invoiceRepository
+                .GetAll()
+                .Select(_mapper.Map)
+                .ToList();
+
+
 
         public InvoiceResponse? FindInvoice(int id)
         {
             var invoice = _invoiceRepository.GetById(id);
-            return invoice == null ? null : _mapper.Map(invoice);
-        }
 
-        public ArchiveInvoiceResult ArchiveInvoice(int id)
-        {
-            var existing = _invoiceRepository.GetById(id);
-
-            if (existing == null)
-                return ArchiveInvoiceResult.NotFound;
-
-            existing.IsInvoiceArchived = true;
-
-            _invoiceRepository.Update(existing);
-            _unitOfWork.Save();
-
-            return ArchiveInvoiceResult.Success;
+            return invoice == null
+                ? null
+                : _mapper.Map(invoice);
         }
     }
 }

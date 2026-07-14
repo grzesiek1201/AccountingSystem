@@ -6,10 +6,21 @@ namespace AccountingSystem.Application.Interfaces
     public interface IOrderService
     {
         OrderAddResponse AddOrder(CreateOrderRequest request);
+
         OrderEditResponse EditOrder(UpdateOrderRequest request);
+
         List<OrderResponse> GetAllOrders();
+
         OrderResponse? FindOrder(int id);
-        OrderStatusResponse ChangeOrderStatus(int id, StatusOrderRequest request);
+
+
+        OrderStatusResponse ConfirmOrder(int id);
+
+        OrderStatusResponse CompleteOrder(int id);
+
+        OrderStatusResponse CancelOrder(int id);
+
+
         ArchiveOrderResult ArchiveOrder(int id);
     }
 }

@@ -37,7 +37,10 @@ namespace AccountingSystem.Application.Services
             {
                 Name = request.Name,
                 Price = request.Price,
-                CategoryId = request.CategoryId
+                CategoryId = request.CategoryId,
+                ProductCode = request.ProductCode,
+                VatRate = request.VatRate,
+                Unit = request.Unit
             };
 
             var existing = _productRepository.GetAll();
@@ -92,6 +95,9 @@ namespace AccountingSystem.Application.Services
             existing.Name = request.Name;
             existing.Price = request.Price;
             existing.CategoryId = request.CategoryId;
+            existing.ProductCode = request.ProductCode;
+            existing.VatRate = request.VatRate;
+            existing.Unit = request.Unit;
 
             var otherProducts = _productRepository
                 .GetAll()
@@ -132,6 +138,9 @@ namespace AccountingSystem.Application.Services
             {
                 Id = p.Id,
                 Name = p.Name,
+                ProductCode = p.ProductCode,
+                VatRate = p.VatRate,
+                Unit = p.Unit,
                 Price = p.Price,
                 CategoryId = p.CategoryId
             })
@@ -150,6 +159,9 @@ namespace AccountingSystem.Application.Services
             {
                 Id = product.Id,
                 Name = product.Name,
+                ProductCode = product.ProductCode,
+                VatRate = product.VatRate,
+                Unit = product.Unit,
                 Price = product.Price,
                 CategoryId = product.CategoryId
             };    
