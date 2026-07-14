@@ -100,7 +100,7 @@ namespace AccountingSystem.Tests.ServicesTests
         {
             _invoiceRepoMock
                 .Setup(x => x.GetById(1))
-                .Returns((Invoice)null);
+                .Returns((Invoice)null!);
 
 
             var result = _service.AddPayment(CreateRequest());
@@ -189,7 +189,7 @@ namespace AccountingSystem.Tests.ServicesTests
         {
             _paymentRepoMock
                 .Setup(x => x.GetById(1))
-                .Returns((Payment)null);
+                .Returns((Payment)null!);
 
 
             var result = _service.DeletePayment(1);

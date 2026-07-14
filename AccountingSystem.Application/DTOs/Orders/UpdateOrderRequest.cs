@@ -7,6 +7,6 @@ namespace AccountingSystem.Application.DTOs.Orders
         public int Id { get; set; }
         public int CustomerId { get; set; }
         public OrderStatus Status { get; set; }
-        public List<UpdateOrderItemRequest> Items { get; set; }
+        public List<UpdateOrderItemRequest> Items { get; set; } = new();
     }
 }

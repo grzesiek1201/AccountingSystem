@@ -69,7 +69,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void NullItems_ReturnsError()
         {
             var q = CreateValidQuotation();
-            q.Items = null;
+            q.Items = null!;
 
             var result = _validator.Validate(q, new List<Quotation>());
 

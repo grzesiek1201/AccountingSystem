@@ -9,5 +9,7 @@ namespace AccountingSystem.Application.DTOs.Customers
         public List<CustomerValidationError> Errors { get; set; } = new List<CustomerValidationError>();
 
         public bool IsSuccess => Result == CustomerAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

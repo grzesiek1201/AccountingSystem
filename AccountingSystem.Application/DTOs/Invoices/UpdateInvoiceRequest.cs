@@ -9,6 +9,6 @@ namespace AccountingSystem.Application.DTOs.Invoices
         public DateTime IssueDate { get; set; }
         public DateTime DueDate { get; set; }
         public InvoiceStatus Status { get; set; }
-        public List<UpdateInvoiceItemRequest> Items { get; set; }
+        public List<UpdateInvoiceItemRequest> Items { get; set; } = new();
     }
 }

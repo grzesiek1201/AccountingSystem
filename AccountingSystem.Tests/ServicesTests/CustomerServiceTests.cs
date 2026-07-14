@@ -117,7 +117,7 @@ namespace AccountingSystem.Tests.ServicesTests
             var request = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(request.Id))
-                .Returns((Customer)null);
+                .Returns((Customer)null!);
 
             var result = _service.EditCustomer(request);
 
@@ -212,7 +212,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void GetCustomerById_NotFound_ShouldReturnNull()
         {
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
-                .Returns((Customer)null);
+                .Returns((Customer)null!);
 
             var result = _service.GetCustomerById(1);
 

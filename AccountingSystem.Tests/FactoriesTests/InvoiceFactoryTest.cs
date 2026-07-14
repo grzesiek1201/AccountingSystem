@@ -87,9 +87,9 @@ namespace AccountingSystem.Tests.FactoriesTests
             Assert.Equal("I-2026-0001", result.InvoiceNumber);
             Assert.Equal(InvoiceStatus.Draft, result.Status);
 
-            Assert.NotNull(result.DateCreated);
-            Assert.NotNull(result.IssueDate);
-            Assert.NotNull(result.DueDate);
+            Assert.NotEqual(default,result.DateCreated);
+            Assert.NotEqual(default,result.IssueDate);
+            Assert.NotEqual(default,result.DueDate);
         }
 
 

@@ -50,7 +50,7 @@ namespace AccountingSystem.Tests.ConvertersTests
         [Fact]
         public void Map_ShouldReturnNull_WhenQuotationIsNull()
         {
-            Quotation quotation = null;
+            Quotation quotation = null!;
 
             var result = _converter.Map(quotation);
 

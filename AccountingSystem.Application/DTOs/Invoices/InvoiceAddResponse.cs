@@ -9,5 +9,7 @@ namespace AccountingSystem.Application.DTOs.Invoices
         public List<InvoiceValidationError> Errors { get; set; } = new List<InvoiceValidationError>();
 
         public bool IsSuccess => Result == InvoiceAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

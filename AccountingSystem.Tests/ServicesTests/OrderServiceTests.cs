@@ -174,7 +174,7 @@ namespace AccountingSystem.Tests.ServicesTests
             var request = CreateUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(request.Id))
-                .Returns((Order)null);
+                .Returns((Order)null!);
 
             var result = _service.EditOrder(request);
 

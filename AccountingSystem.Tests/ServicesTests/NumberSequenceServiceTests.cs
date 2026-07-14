@@ -34,7 +34,7 @@ namespace AccountingSystem.Tests.ServicesTests
                 .Setup(r => r.GetNextWithLock(
                     DocumentType.Invoice,
                     It.IsAny<int>()))
-                .Returns((NumberSequence)null);
+                .Returns((NumberSequence)null!);
 
 
             var result = _service.GetNext(DocumentType.Invoice);
@@ -65,12 +65,10 @@ namespace AccountingSystem.Tests.ServicesTests
         [Fact]
         public void GetNext_ExistingSequence_ShouldIncrementAndReturnNextNumber()
         {
-            var seq = new NumberSequence
-            {
-                DocumentType = DocumentType.Invoice,
-                Year = DateTime.UtcNow.Year,
-                LastNumber = 5
-            };
+            var seq = new NumberSequence(
+                    DocumentType.Invoice,
+                    DateTime.UtcNow.Year,
+                    5);
 
 
             _repoMock
@@ -114,7 +112,7 @@ namespace AccountingSystem.Tests.ServicesTests
                 .Setup(r => r.GetNextWithLock(
                     type,
                     It.IsAny<int>()))
-                .Returns((NumberSequence)null);
+                .Returns((NumberSequence)null!);
 
 
             var result = _service.GetNext(type);
@@ -131,12 +129,10 @@ namespace AccountingSystem.Tests.ServicesTests
         [Fact]
         public void GetNext_ShouldAlwaysReturn4DigitNumber()
         {
-            var seq = new NumberSequence
-            {
-                DocumentType = DocumentType.Invoice,
-                Year = DateTime.UtcNow.Year,
-                LastNumber = 9
-            };
+            var seq = new NumberSequence(
+                DocumentType.Invoice,
+                DateTime.UtcNow.Year,
+                9);
 
 
             _repoMock
@@ -162,7 +158,7 @@ namespace AccountingSystem.Tests.ServicesTests
                 .Setup(r => r.GetNextWithLock(
                     DocumentType.Invoice,
                     It.IsAny<int>()))
-                .Returns((NumberSequence)null);
+                .Returns((NumberSequence)null!);
 
 
             _uowMock

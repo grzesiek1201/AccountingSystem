@@ -3,8 +3,8 @@
     public class QuotationItemResponse
     {
         public int ProductId { get; set; }
-        public string ProductName { get; set; }
-        public string ProductCode { get; set; }
+        public string ProductName { get; set; } = string.Empty;
+        public string ProductCode { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public decimal VatRate { get; set; }
         public ProductUnit Unit { get; set; }

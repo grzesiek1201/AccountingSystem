@@ -69,7 +69,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void NullItems_ReturnsError()
         {
             var inv = CreateValidInvoice();
-            inv.Items = null;
+            inv.Items = null!;
 
             var result = _validator.Validate(inv, new List<Invoice>());
             Assert.NotEmpty(result.Errors);

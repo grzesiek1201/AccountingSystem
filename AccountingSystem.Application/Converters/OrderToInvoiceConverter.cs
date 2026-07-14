@@ -6,8 +6,7 @@ namespace AccountingSystem.Application.Converters
     {
         public Invoice Map(Order order)
         {
-            if (order == null)
-                return null;
+            ArgumentNullException.ThrowIfNull(order);
 
             var invoice = new Invoice
             {

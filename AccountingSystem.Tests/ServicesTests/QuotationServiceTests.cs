@@ -170,7 +170,7 @@ namespace AccountingSystem.Tests.ServicesTests
             var req = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(req.Id))
-                .Returns((Quotation)null);
+                .Returns((Quotation)null!);
 
             var result = _service.EditQuotation(req);
 
@@ -224,7 +224,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void FindQuotation_NotExisting_ShouldReturnNull()
         {
             _repoMock.Setup(r => r.GetById(1))
-                .Returns((Quotation)null);
+                .Returns((Quotation)null!);
 
             var result = _service.FindQuotation(1);
 

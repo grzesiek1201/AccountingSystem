@@ -9,5 +9,7 @@ namespace AccountingSystem.Application.DTOs.Quotations
         public List<QuotationValidationError> Errors { get; set; } = new List<QuotationValidationError>();
 
         public bool IsSuccess => Result == QuotationAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

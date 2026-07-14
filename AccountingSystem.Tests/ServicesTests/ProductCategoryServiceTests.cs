@@ -119,7 +119,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void EditProductCategory_NotFound_ShouldReturnNotFound()
         {
             _repoMock.Setup(x => x.GetById(It.IsAny<int>()))
-                .Returns((ProductCategory)null);
+                .Returns((ProductCategory)null!);
 
             var result = _service.EditProductCategory(CreateValidUpdateRequest());
 
@@ -187,7 +187,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void ChangeStatus_NotFound_ShouldReturnNotFound()
         {
             _repoMock.Setup(x => x.GetById(It.IsAny<int>()))
-                .Returns((ProductCategory)null);
+                .Returns((ProductCategory)null!);
 
             var result = _service.ChangeProductCategoryStatus(1, true);
 
@@ -245,7 +245,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void GetById_NotFound_ShouldReturnNull()
         {
             _repoMock.Setup(x => x.GetById(It.IsAny<int>()))
-                .Returns((ProductCategory)null);
+                .Returns((ProductCategory)null!);
 
             var result = _service.GetProductCategoryById(1);
 

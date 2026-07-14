@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
-        public string InvoiceNumber { get; set; }
-        public List<CreateInvoiceItemRequest> Items { get; set; }
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public List<CreateInvoiceItemRequest> Items { get; set; } = new();
     }
 }

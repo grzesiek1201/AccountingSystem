@@ -10,7 +10,7 @@ namespace AccountingSystem.Domain.Entities
         }
         public int Id { get; set; }
 
-        public string InvoiceNumber { get; set; }
+        public string InvoiceNumber { get; set; } = string.Empty;
 
         public int OrderId { get; set; }
 
@@ -26,15 +26,15 @@ namespace AccountingSystem.Domain.Entities
 
         public int CustomerId { get; set; }
 
-        public Customer Customer { get; set; }
+        public Customer Customer { get; set; } = null!;
 
         // SNAPSHOT CUSTOMER
-        public string CustomerName { get; set; }
-        public string CustomerNIP { get; set; }
-        public string CustomerEmail { get; set; }
-        public string CustomerStreet { get; set; }
-        public string CustomerZipCode { get; set; }
-        public string CustomerCity { get; set; }
+        public string CustomerName { get; set; } = string.Empty;
+        public string CustomerNIP { get; set; } = string.Empty;
+        public string CustomerEmail { get; set; } = string.Empty;
+        public string CustomerStreet { get; set; } = string.Empty;
+        public string CustomerZipCode { get; set; } = string.Empty;
+        public string CustomerCity { get; set; } = string.Empty;
 
         public bool IsInvoiceArchived { get; set; }
 
@@ -80,19 +80,19 @@ namespace AccountingSystem.Domain.Entities
     {
         public int Id { get; set; }
 
-        public string ProductName { get; set; }
-        public string ProductCode { get; set; }
+        public  string ProductName { get; set; } = string.Empty;
+        public  string ProductCode { get; set; } = string.Empty;
         public decimal VatRate { get; set; }
         public ProductUnit Unit { get; set; }
 
 
         public int InvoiceId { get; set; }
 
-        public Invoice Invoice { get; set; }
+        public Invoice Invoice { get; set; } = null!;
 
         public int ProductId { get; set; }
 
-        public Product Product { get; set; }
+        public Product Product { get; set; } = null!;
 
         public int Position { get; set; }
 

@@ -1,15 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using AccountingSystem.Domain.Enums;
+﻿using AccountingSystem.Domain.Enums;
 
-namespace AccountingSystem.Domain.Entities
+public class NumberSequence
 {
-    public class NumberSequence
+    protected NumberSequence()
     {
-        public int Id { get; set; }
-        public DocumentType DocumentType { get; set; }
-        public int Year { get; set; }
-        public int LastNumber { get; set; }
+    }
+
+    public NumberSequence(
+        DocumentType documentType,
+        int year,
+        int lastNumber = 1)
+    {
+        DocumentType = documentType;
+        Year = year;
+        LastNumber = lastNumber;
+    }
+
+    public int Id { get; set; }
+    public DocumentType DocumentType { get; private set; }
+    public int Year { get; private set; }
+    public int LastNumber { get; private set; }
+
+    public void Increment()
+    {
+        LastNumber++;
     }
 }

@@ -9,5 +9,7 @@ namespace AccountingSystem.Application.DTOs.Orders
         public List<OrderValidationError> Errors { get; set; } = new List<OrderValidationError>();
 
         public bool IsSuccess => Result == OrderAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

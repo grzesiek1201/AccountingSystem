@@ -6,8 +6,7 @@ namespace AccountingSystem.Application.Converters
     {
         public Order Map(Quotation quotation)
         {
-            if (quotation == null)
-                return null;
+            ArgumentNullException.ThrowIfNull(quotation);
 
             return new Order
             {

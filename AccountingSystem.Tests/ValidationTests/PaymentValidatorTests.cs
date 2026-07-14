@@ -56,7 +56,7 @@ namespace AccountingSystem.Tests.ValidationTests
         [Fact]
         public void InvoiceNotFound_ReturnsError()
         {
-            _repoMock.Setup(r => r.GetById(1)).Returns((Invoice)null);
+            _repoMock.Setup(r => r.GetById(1)).Returns((Invoice)null!);
 
             var result = _validator.Validate(1, CreateValidPayment());
 

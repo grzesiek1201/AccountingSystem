@@ -4,7 +4,7 @@
     {
         public int Id { get; set; }
         public int CustomerId { get; set; }
-        public string QuotationNumber { get; set; }
-        public List<CreateQuotationItemRequest> Items { get; set; }
+        public string QuotationNumber { get; set; } = string.Empty;
+        public List<CreateQuotationItemRequest> Items { get; set; } = new();
     }
 }

@@ -50,7 +50,7 @@ namespace AccountingSystem.Tests.ConvertersTests
         [Fact]
         public void Map_ShouldReturnNull_WhenOrderIsNull()
         {
-            Order order = null;
+            Order order = null!;
 
             var result = _converter.Map(order);
 

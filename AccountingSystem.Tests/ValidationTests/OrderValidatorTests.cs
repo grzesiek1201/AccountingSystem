@@ -67,7 +67,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void NullItems_ReturnsError()
         {
             var order = CreateValidOrder();
-            order.Items = null;
+            order.Items = null!;
 
             var result = _validator.Validate(order, new List<Order>());
             Assert.NotEmpty(result.Errors);

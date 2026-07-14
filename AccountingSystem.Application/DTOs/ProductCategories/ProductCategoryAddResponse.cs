@@ -9,5 +9,7 @@ namespace AccountingSystem.Application.DTOs.ProductCategories
         public List<ProductCategoryValidationError> Errors { get; set; } = new List<ProductCategoryValidationError>();
 
         public bool IsSuccess => Result == ProductCategoryAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

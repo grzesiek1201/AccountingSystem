@@ -86,7 +86,7 @@ namespace AccountingSystem.Tests.FactoriesTests
             Assert.Equal(1, result.CustomerId);
             Assert.Equal("O-2026-0001", result.OrderNumber);
             Assert.Equal(OrderStatus.Draft, result.Status);
-            Assert.NotNull(result.DateCreated);
+            Assert.NotEqual(default, result.DateCreated);
         }
 
 

@@ -88,7 +88,7 @@ namespace AccountingSystem.Tests.FactoriesTests
             Assert.Equal("Q-2026-0001", result.QuotationNumber);
             Assert.Equal(QuotationStatus.Draft, result.Status);
 
-            Assert.NotNull(result.DateCreated);
+            Assert.NotEqual(default,result.DateCreated);
 
             Assert.Single(result.Items);
         }

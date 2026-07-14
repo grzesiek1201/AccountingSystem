@@ -11,5 +11,7 @@ namespace AccountingSystem.Application.DTOs.Products
         public List<ProductValidationError> Errors { get; set; } = new();
 
         public bool IsSuccess => Result == ProductAddResult.Success;
+
+        public int CreatedId { get; set; }
     }
 }

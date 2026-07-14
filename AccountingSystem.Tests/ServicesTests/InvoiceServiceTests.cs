@@ -161,7 +161,7 @@ namespace AccountingSystem.Tests.ServicesTests
             var req = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(req.Id))
-                .Returns((Invoice)null);
+                .Returns((Invoice)null!);
 
             var result = _service.EditInvoice(req);
 

@@ -152,7 +152,7 @@ namespace AccountingSystem.Tests.ServicesTests
             var request = CreateValidUpdateRequest();
 
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
-                .Returns((Product)null);
+                .Returns((Product)null!);
 
             var result = _service.EditProduct(request);
 
@@ -223,7 +223,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void ArchiveProduct_NotFound_ShouldReturnNotFound()
         {
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
-                .Returns((Product)null);
+                .Returns((Product)null!);
 
             var result = _service.ArchiveProduct(1);
 
@@ -256,7 +256,7 @@ namespace AccountingSystem.Tests.ServicesTests
         public void GetProductById_NotExisting_ShouldReturnNull()
         {
             _repoMock.Setup(r => r.GetById(It.IsAny<int>()))
-                .Returns((Product)null);
+                .Returns((Product)null!);
 
             var result = _service.GetProductById(1);
 

@@ -49,7 +49,7 @@ namespace AccountingSystem.Tests.ValidationTests
         public void Validate_NullName_ShouldReturnEmptyNameError()
         {
             var category = CreateValidCategory();
-            category.Name = null;
+            category.Name = null!;
 
             var result = _validator.Validate(category, new List<ProductCategory>());
 
