@@ -43,6 +43,14 @@ namespace AccountingSystem.Infrastructure.Data
             modelBuilder.Entity<Product>()
                 .HasIndex(p => p.CategoryId);
 
+            modelBuilder.Entity<Product>()
+                .Property(p => p.Price)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Product>()
+                .Property(p => p.VatRate)
+                .HasPrecision(5, 2);
+
             // ================= PRODUCT CATEGORY =================
             modelBuilder.Entity<ProductCategory>()
                 .HasKey(c => c.Id);
@@ -71,6 +79,14 @@ namespace AccountingSystem.Infrastructure.Data
                 .Property(q => q.DiscountPercent)
                 .HasPrecision(5, 2);
 
+            modelBuilder.Entity<QuotationItem>()
+                .Property(q => q.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<QuotationItem>()
+                .Property(q => q.VatRate)
+                .HasPrecision(5, 2);
+
             // ================= ORDER =================
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.Items)
@@ -84,6 +100,14 @@ namespace AccountingSystem.Infrastructure.Data
 
             modelBuilder.Entity<OrderItem>()
                 .Property(o => o.DiscountPercent)
+                .HasPrecision(5, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(o => o.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<OrderItem>()
+                .Property(o => o.VatRate)
                 .HasPrecision(5, 2);
 
             // ================= INVOICE =================
@@ -101,6 +125,18 @@ namespace AccountingSystem.Infrastructure.Data
                 .Property(i => i.DiscountPercent)
                 .HasPrecision(5, 2);
 
+            modelBuilder.Entity<Invoice>()
+                .Property(i => i.TotalAmount)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<InvoiceItem>()
+                .Property(i => i.Total)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<InvoiceItem>()
+                .Property(i => i.VatRate)
+                .HasPrecision(5, 2);
+
             // ================= PAYMENT =================
             modelBuilder.Entity<Payment>()
                 .Property(p => p.Amount)
@@ -111,6 +147,30 @@ namespace AccountingSystem.Infrastructure.Data
                 .WithMany(i => i.Payments)
                 .HasForeignKey(p => p.InvoiceId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // ================= NUMBER SEQUENCE =================
+
+            modelBuilder.Entity<NumberSequence>()
+                .HasIndex(x => new
+                {
+                    x.DocumentType,
+                    x.Year
+                })
+                .IsUnique();
+
+            // ================= DOCUMENT NUMBERS =================
+
+            modelBuilder.Entity<Invoice>()
+                .HasIndex(x => x.InvoiceNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(x => x.OrderNumber)
+                .IsUnique();
+
+            modelBuilder.Entity<Quotation>()
+                .HasIndex(x => x.QuotationNumber)
+                .IsUnique();
         }
     }
 }
