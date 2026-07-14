@@ -5,7 +5,6 @@ using AccountingSystem.Domain.Enums;
 using Moq;
 using Xunit;
 
-
 namespace AccountingSystem.Tests.ServicesTests
 {
     public class NumberSequenceServiceTests
@@ -25,23 +24,41 @@ namespace AccountingSystem.Tests.ServicesTests
             );
         }
 
+
         // ================= FIRST CREATE =================
 
         [Fact]
         public void GetNext_NoSequence_ShouldCreateNewAndReturnFirstNumber()
         {
             _repoMock
-                .Setup(r => r.GetNext(DocumentType.Invoice, It.IsAny<int>()))
+                .Setup(r => r.GetNextWithLock(
+                    DocumentType.Invoice,
+                    It.IsAny<int>()))
                 .Returns((NumberSequence)null);
+
 
             var result = _service.GetNext(DocumentType.Invoice);
 
-            Assert.Contains("I-2026-0001", result);
 
-            _repoMock.Verify(r => r.Add(It.IsAny<NumberSequence>()), Times.Once);
-            _repoMock.Verify(r => r.Update(It.IsAny<NumberSequence>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Once);
+            Assert.Contains($"I-{DateTime.UtcNow.Year}-0001", result);
+
+            _repoMock.Verify(
+                r => r.Add(It.IsAny<NumberSequence>()),
+                Times.Once);
+
+            _repoMock.Verify(
+                r => r.Update(It.IsAny<NumberSequence>()),
+                Times.Never);
+
+            _uowMock.Verify(
+                u => u.Save(),
+                Times.Once);
+
+            _uowMock.Verify(
+                u => u.Commit(),
+                Times.Once);
         }
+
 
         // ================= INCREMENT =================
 
@@ -55,18 +72,33 @@ namespace AccountingSystem.Tests.ServicesTests
                 LastNumber = 5
             };
 
+
             _repoMock
-                .Setup(r => r.GetNext(DocumentType.Invoice, It.IsAny<int>()))
+                .Setup(r => r.GetNextWithLock(
+                    DocumentType.Invoice,
+                    It.IsAny<int>()))
                 .Returns(seq);
+
 
             var result = _service.GetNext(DocumentType.Invoice);
 
+
             Assert.Contains("0006", result);
 
-            _repoMock.Verify(r => r.Update(seq), Times.Once);
-            _repoMock.Verify(r => r.Add(It.IsAny<NumberSequence>()), Times.Never);
-            _uowMock.Verify(u => u.Save(), Times.Once);
+
+            _repoMock.Verify(
+                r => r.Update(seq),
+                Times.Once);
+
+            _repoMock.Verify(
+                r => r.Add(It.IsAny<NumberSequence>()),
+                Times.Never);
+
+            _uowMock.Verify(
+                u => u.Save(),
+                Times.Once);
         }
+
 
         // ================= PREFIX CHECK =================
 
@@ -74,16 +106,25 @@ namespace AccountingSystem.Tests.ServicesTests
         [InlineData(DocumentType.Invoice, "I")]
         [InlineData(DocumentType.Order, "O")]
         [InlineData(DocumentType.Quotation, "Q")]
-        public void GetNext_ShouldReturnCorrectPrefix(DocumentType type, string expectedPrefix)
+        public void GetNext_ShouldReturnCorrectPrefix(
+            DocumentType type,
+            string expectedPrefix)
         {
             _repoMock
-                .Setup(r => r.GetNext(type, It.IsAny<int>()))
+                .Setup(r => r.GetNextWithLock(
+                    type,
+                    It.IsAny<int>()))
                 .Returns((NumberSequence)null);
+
 
             var result = _service.GetNext(type);
 
-            Assert.StartsWith($"{expectedPrefix}-{DateTime.UtcNow.Year}-", result);
+
+            Assert.StartsWith(
+                $"{expectedPrefix}-{DateTime.UtcNow.Year}-",
+                result);
         }
+
 
         // ================= FORMAT CHECK =================
 
@@ -97,15 +138,45 @@ namespace AccountingSystem.Tests.ServicesTests
                 LastNumber = 9
             };
 
+
             _repoMock
-                .Setup(r => r.GetNext(DocumentType.Invoice, It.IsAny<int>()))
+                .Setup(r => r.GetNextWithLock(
+                    DocumentType.Invoice,
+                    It.IsAny<int>()))
                 .Returns(seq);
+
 
             var result = _service.GetNext(DocumentType.Invoice);
 
+
             Assert.EndsWith("-0010", result);
         }
+
+
+        // ================= ROLLBACK =================
+
+        [Fact]
+        public void GetNext_WhenSaveFails_ShouldRollback()
+        {
+            _repoMock
+                .Setup(r => r.GetNextWithLock(
+                    DocumentType.Invoice,
+                    It.IsAny<int>()))
+                .Returns((NumberSequence)null);
+
+
+            _uowMock
+                .Setup(u => u.Save())
+                .Throws(new Exception());
+
+
+            Assert.Throws<Exception>(() =>
+                _service.GetNext(DocumentType.Invoice));
+
+
+            _uowMock.Verify(
+                u => u.Rollback(),
+                Times.Once);
+        }
     }
-
 }
-

@@ -1,8 +1,8 @@
-﻿using AccountingSystem.Application.Repositories;
-using AccountingSystem.Domain.Entities;
+﻿using AccountingSystem.Domain.Entities;
 using AccountingSystem.Domain.Enums;
+using AccountingSystem.Application.Interfaces;
 using AccountingSystem.Infrastructure.Data;
-using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace AccountingSystem.Infrastructure.Repositories
 {
@@ -15,18 +15,26 @@ namespace AccountingSystem.Infrastructure.Repositories
             _context = context;
         }
 
-        public NumberSequence? GetNext(DocumentType type, int year)
+
+        public NumberSequence? GetNextWithLock(
+            DocumentType type,
+            int year)
         {
             return _context.NumberSequences
-                .FirstOrDefault(x =>
-                    x.DocumentType == type &&
-                    x.Year == year);
+                .FromSqlInterpolated($@"
+                    SELECT *
+                    FROM NumberSequences WITH (UPDLOCK, ROWLOCK)
+                    WHERE DocumentType = {type}
+                    AND Year = {year}")
+                .FirstOrDefault();
         }
+
 
         public void Add(NumberSequence sequence)
         {
             _context.NumberSequences.Add(sequence);
         }
+
 
         public void Update(NumberSequence sequence)
         {

@@ -18,35 +18,63 @@ namespace AccountingSystem.Application.Services
             _unitOfWork = unitOfWork;
         }
 
+
         public string GetNext(DocumentType type)
         {
             int year = DateTime.UtcNow.Year;
 
-            var sequence = _repository.GetNext(type, year);
+            _unitOfWork.BeginTransaction();
 
-            if (sequence == null)
+            try
             {
-                sequence = new NumberSequence
+                var sequence = _repository
+                    .GetNextWithLock(type, year);
+
+
+                if (sequence == null)
                 {
-                    DocumentType = type,
-                    Year = year,
-                    LastNumber = 1
-                };
+                    sequence = new NumberSequence
+                    {
+                        DocumentType = type,
+                        Year = year,
+                        LastNumber = 1
+                    };
 
-                _repository.Add(sequence);
+                    _repository.Add(sequence);
+                }
+                else
+                {
+                    sequence.LastNumber++;
+                    _repository.Update(sequence);
+                }
+
+
+                _unitOfWork.Save();
+
+                _unitOfWork.Commit();
+
+
+                return FormatNumber(
+                    type,
+                    year,
+                    sequence.LastNumber);
             }
-            else
+            catch
             {
-                sequence.LastNumber++;
-                _repository.Update(sequence);
+                _unitOfWork.Rollback();
+                throw;
             }
-
-            _unitOfWork.Save();
-
-            string prefix = GetPrefix(type);
-
-            return $"{prefix}-{year}-{sequence.LastNumber:0000}";
         }
+
+
+        private string FormatNumber(
+            DocumentType type,
+            int year,
+            int number)
+        {
+            return $"{GetPrefix(type)}-{year}-{number:0000}";
+        }
+
 
         private string GetPrefix(DocumentType type)
         {
@@ -55,7 +83,8 @@ namespace AccountingSystem.Application.Services
                 DocumentType.Quotation => "Q",
                 DocumentType.Order => "O",
                 DocumentType.Invoice => "I",
-                _ => throw new ArgumentOutOfRangeException()
+
+                _ => throw new ArgumentOutOfRangeException(nameof(type))
             };
         }
     }
