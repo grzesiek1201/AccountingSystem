@@ -56,7 +56,6 @@ namespace AccountingSystem.Tests.ServicesTests
             {
                 Id = 1,
                 TotalAmount = 500,
-                Status = InvoiceStatus.Issued
             };
         }
 
@@ -264,14 +263,12 @@ namespace AccountingSystem.Tests.ServicesTests
                     Id = 1,
                     InvoiceId = 1,
                     Amount = 100,
-                    Status = PaymentStatus.Paid
                 },
                 new Payment
                 {
                     Id = 2,
                     InvoiceId = 1,
                     Amount = 200,
-                    Status = PaymentStatus.Paid
                 }
             };
 

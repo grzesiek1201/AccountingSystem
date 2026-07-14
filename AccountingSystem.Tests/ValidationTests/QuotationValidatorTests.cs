@@ -18,7 +18,6 @@ namespace AccountingSystem.Tests.ValidationTests
             {
                 Id = 1,
                 QuotationNumber = "Q-2026-001",
-                Status = QuotationStatus.Draft,
 
                 DateCreated = new DateTime(2026, 1, 1),
 

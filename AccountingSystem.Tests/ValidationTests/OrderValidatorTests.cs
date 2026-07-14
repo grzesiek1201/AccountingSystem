@@ -18,7 +18,6 @@ namespace AccountingSystem.Tests.ValidationTests
             {
                 Id = 1,
                 OrderNumber = "O-2026-001",
-                Status = OrderStatus.Draft,
 
                 DateCreated = new DateTime(2026, 1, 1),
 

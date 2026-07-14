@@ -148,7 +148,6 @@ namespace AccountingSystem.Tests.ServicesTests
             {
                 Id = 1,
                 CustomerId = 1,
-                Status = QuotationStatus.Draft,
                 Items = new List<QuotationItem>()
             };
 
@@ -187,7 +186,6 @@ namespace AccountingSystem.Tests.ServicesTests
                 .Returns(new Quotation
                 {
                     Id = 1,
-                    IsQuotationArchived = true
                 });
 
             var result = _service.EditQuotation(req);

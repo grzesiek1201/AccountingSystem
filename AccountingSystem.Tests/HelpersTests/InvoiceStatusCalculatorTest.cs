@@ -21,7 +21,6 @@ namespace AccountingSystem.Tests.HelpersTests
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(-1),
-                Status = InvoiceStatus.Issued
             };
 
             _calculator.Recalculate(invoice, 50m);
@@ -37,7 +36,6 @@ namespace AccountingSystem.Tests.HelpersTests
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(-1),
-                Status = InvoiceStatus.Overdue
             };
 
             _calculator.Recalculate(invoice, 100m);
@@ -53,7 +51,6 @@ namespace AccountingSystem.Tests.HelpersTests
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(5),
-                Status = InvoiceStatus.Issued
             };
 
             _calculator.Recalculate(invoice, 0m);
@@ -69,7 +66,6 @@ namespace AccountingSystem.Tests.HelpersTests
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(-5),
-                Status = InvoiceStatus.Overdue
             };
 
             _calculator.Recalculate(invoice, 150m);

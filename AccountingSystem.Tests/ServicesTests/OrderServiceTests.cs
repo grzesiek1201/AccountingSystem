@@ -188,7 +188,6 @@ namespace AccountingSystem.Tests.ServicesTests
             var order = new Order
             {
                 Id = 1,
-                IsOrderArchived = true
             };
 
             var request = CreateUpdateRequest();

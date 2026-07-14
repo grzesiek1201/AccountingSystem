@@ -18,7 +18,6 @@ namespace AccountingSystem.Tests.ValidationTests
             {
                 Id = 1,
                 InvoiceNumber = "F-2026-001",
-                Status = InvoiceStatus.Draft,
 
                 DateCreated = new DateTime(2026, 1, 1),
                 IssueDate = new DateTime(2026, 1, 1),
