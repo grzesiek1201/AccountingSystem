@@ -99,10 +99,10 @@ namespace AccountingSystem.Application.Services
             _orderRepository.Add(order);
             _unitOfWork.Save();
 
-
             return new OrderAddResponse
             {
-                Result = OrderAddResult.Success
+                Result = OrderAddResult.Success,
+                CreatedId = order.Id
             };
         }
 

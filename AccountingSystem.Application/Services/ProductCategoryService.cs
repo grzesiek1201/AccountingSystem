@@ -59,7 +59,8 @@ namespace AccountingSystem.Application.Services
 
             return new ProductCategoryAddResponse
             {
-                Result = ProductCategoryAddResult.Success
+                Result = ProductCategoryAddResult.Success,
+                CreatedId = productCategory.Id
             };
         }
 

@@ -78,7 +78,7 @@ public class ProductCategoriesController : ControllerBase
 
         _logger.LogInformation("Product category created");
 
-        return Ok(result);
+        return CreatedAtAction(nameof(Find), new { id = result.CreatedId }, null);
     }
 
     // ================= UPDATE =================

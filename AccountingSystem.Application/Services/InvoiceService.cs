@@ -113,7 +113,8 @@ namespace AccountingSystem.Application.Services
 
             return new InvoiceAddResponse
             {
-                Result = InvoiceAddResult.Success
+                Result = InvoiceAddResult.Success,
+                CreatedId = invoice.Id
             };
         }
 

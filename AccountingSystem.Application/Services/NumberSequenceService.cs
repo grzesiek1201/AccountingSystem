@@ -33,18 +33,13 @@ namespace AccountingSystem.Application.Services
 
                 if (sequence == null)
                 {
-                    sequence = new NumberSequence
-                    {
-                        DocumentType = type,
-                        Year = year,
-                        LastNumber = 1
-                    };
+                    sequence = new NumberSequence(type, year);
 
                     _repository.Add(sequence);
                 }
                 else
                 {
-                    sequence.LastNumber++;
+                    sequence.Increment();
                     _repository.Update(sequence);
                 }
 

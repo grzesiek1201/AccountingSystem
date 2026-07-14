@@ -4,7 +4,7 @@
     {
         public int ProductId { get; set; }
         public string ProductName { get; set; } = string.Empty;
-        public string ProductCode { get; set; }
+        public string ProductCode { get; set; } = string.Empty;
         public decimal VatRate { get; set; }
         public ProductUnit Unit { get; set; }
 

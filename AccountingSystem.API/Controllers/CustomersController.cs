@@ -1,8 +1,5 @@
 ﻿using AccountingSystem.Application.DTOs.Customers;
-using AccountingSystem.Application.DTOs.Products;
 using AccountingSystem.Application.Interfaces;
-using AccountingSystem.Application.Services;
-using AccountingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AccountingSystem.API.Controllers;
@@ -73,16 +70,6 @@ public class CustomersController : ControllerBase
     {
         _logger.LogInformation("POST customer {Name}", request.Name);
 
-        var customer = new Customer
-        {
-            Name = request.Name,
-            NIP = request.NIP,
-            Email = request.Email,
-            City = request.City,
-            Street = request.Street,
-            ZipCode = request.ZipCode
-        };
-
         var result = _customerService.AddCustomer(request);
 
         if (!result.IsSuccess)
@@ -91,18 +78,9 @@ public class CustomersController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-        _logger.LogInformation("Customer created: {Id}", customer.Id);
+        _logger.LogInformation("Customer created: {Id}", result.CreatedId);
 
-        return CreatedAtAction(nameof(Find), new { id = customer.Id }, new CustomerResponse
-        {
-            Id = customer.Id,
-            Name = customer.Name,
-            NIP = customer.NIP,
-            Email = customer.Email,
-            City = customer.City,
-            Street = customer.Street,
-            ZipCode = customer.ZipCode
-        });
+        return CreatedAtAction(nameof(Find), new { id = result.CreatedId }, null);
     }
 
     [HttpPut("{id}")]
@@ -110,16 +88,7 @@ public class CustomersController : ControllerBase
     {
         _logger.LogInformation("PUT customer {Id}", id);
 
-        var customer = new Customer
-        {
-            Id = id,
-            Name = request.Name,
-            NIP = request.NIP,
-            Email = request.Email,
-            City = request.City,
-            Street = request.Street,
-            ZipCode = request.ZipCode
-        };
+        request.Id = id;
 
         var result = _customerService.EditCustomer(request);
 
@@ -129,7 +98,14 @@ public class CustomersController : ControllerBase
             return BadRequest(result.Errors);
         }
 
-         _logger.LogInformation("Customer updated: {Id}", id);
+        _logger.LogInformation("Customer updated: {Id}", id);
+
+        var customer = _customerService.GetCustomerById(id);
+
+        if (customer == null)
+        {
+            return NotFound();
+        }
 
         return Ok(new CustomerResponse
         {
@@ -143,6 +119,3 @@ public class CustomersController : ControllerBase
         });
     }
 }
-
-     
-    

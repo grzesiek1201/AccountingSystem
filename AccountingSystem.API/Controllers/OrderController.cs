@@ -59,7 +59,7 @@ namespace AccountingSystem.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return Ok(result);
+            return CreatedAtAction(nameof(Find), new { id = result.CreatedId }, null);
         }
 
         // ================= UPDATE =================
@@ -83,7 +83,7 @@ namespace AccountingSystem.API.Controllers
             if (updated == null)
                 return NotFound();
 
-            return Ok(updated);
+            return Ok(result);
         }
 
         // ================= ARCHIVE =================

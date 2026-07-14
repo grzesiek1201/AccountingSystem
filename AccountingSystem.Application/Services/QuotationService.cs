@@ -95,10 +95,10 @@ namespace AccountingSystem.Application.Services
             _quotationRepository.Add(quotation);
             _unitOfWork.Save();
 
-
             return new QuotationAddResponse
             {
-                Result = QuotationAddResult.Success
+                Result = QuotationAddResult.Success,
+                CreatedId = quotation.Id
             };
         }
 

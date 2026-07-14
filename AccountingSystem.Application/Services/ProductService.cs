@@ -61,7 +61,7 @@ namespace AccountingSystem.Application.Services
             return new ProductAddResponse
             {
                 Result = ProductAddResult.Success,
-                Id = product.Id
+                CreatedId = product.Id
             };
         }
 

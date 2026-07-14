@@ -59,7 +59,7 @@ namespace AccountingSystem.API.Controllers
                 return BadRequest(result.Errors);
             }
 
-            return Ok(result);
+            return CreatedAtAction(nameof(Find), new { id = result.CreatedId }, null);
         }
 
         // ================= UPDATE =================

@@ -62,7 +62,8 @@ namespace AccountingSystem.Application.Services
 
             return new CustomerAddResponse
             {
-                Result = CustomerAddResult.Success
+                Result = CustomerAddResult.Success,
+                CreatedId = customer.Id
             };
         }
 
