@@ -11,6 +11,9 @@ namespace AccountingSystem.Application.Mappers
             {
                 Id = p.Id,
                 Name = p.Name,
+                ProductCode = p.ProductCode,
+                VatRate = p.VatRate,
+                Unit = p.Unit,
                 Price = p.Price,
                 CategoryId = p.CategoryId
             };

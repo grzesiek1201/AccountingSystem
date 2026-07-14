@@ -32,6 +32,9 @@ namespace AccountingSystem.Application.Mappers
                 {
                     ProductId = i.ProductId,
                     ProductName = i.ProductName,
+                    ProductCode = i.ProductCode,
+                    VatRate = i.VatRate,
+                    Unit = i.Unit,
                     Quantity = i.Quantity,
                     DiscountPercent = i.DiscountPercent,
                     BaseUnitPrice = i.BaseUnitPrice,

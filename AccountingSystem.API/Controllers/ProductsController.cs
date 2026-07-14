@@ -1,6 +1,5 @@
 ﻿using AccountingSystem.Application.DTOs.Products;
 using AccountingSystem.Application.Interfaces;
-using AccountingSystem.Application.Services;
 using AccountingSystem.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -34,6 +33,9 @@ public class ProductsController : ControllerBase
         {
             Id = p.Id,
             Name = p.Name,
+            ProductCode = p.ProductCode,
+            VatRate = p.VatRate,
+            Unit = p.Unit,
             Price = p.Price,
             CategoryId = p.CategoryId
         }));
@@ -56,6 +58,9 @@ public class ProductsController : ControllerBase
         {
             Id = product.Id,
             Name = product.Name,
+            ProductCode = product.ProductCode,
+            VatRate = product.VatRate,
+            Unit = product.Unit,
             Price = product.Price,
             CategoryId = product.CategoryId
         });
@@ -87,6 +92,9 @@ public class ProductsController : ControllerBase
         {
             Id = id,
             Name = request.Name,
+            ProductCode = request.ProductCode,
+            VatRate = request.VatRate,
+            Unit = request.Unit,
             Price = request.Price,
             CategoryId = request.CategoryId
         };
@@ -105,6 +113,9 @@ public class ProductsController : ControllerBase
         {
             Id = product.Id,
             Name = product.Name,
+            ProductCode = product.ProductCode,
+            VatRate = product.VatRate,
+            Unit = product.Unit,
             Price = product.Price,
             CategoryId = product.CategoryId
         });
