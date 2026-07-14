@@ -23,6 +23,7 @@ namespace AccountingSystem.Domain.Enums
     {
         Success,
         NotFound,
+        InvalidOperation
     }
 
     public enum ConvertQuotationResult

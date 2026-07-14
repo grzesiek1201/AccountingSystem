@@ -7,11 +7,10 @@ namespace AccountingSystem.Domain.Enums
     public enum QuotationStatus
     {
         Draft,
-        Active,
-        Inactive,
-        Canceled,
+        Sent,
         Accepted,
-        ConvertedToOrder,
-        Expired
+        Expired,
+        Converted,
+        Rejected
     }
 }

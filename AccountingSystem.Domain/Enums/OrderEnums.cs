@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
 namespace AccountingSystem.Domain.Enums
 {
 
@@ -25,13 +19,14 @@ namespace AccountingSystem.Domain.Enums
     {
         Success,
         NotFound,
+        InvalidOperation
     }
 
     public enum ConvertOrderResult
     {
         Success,
         NotFound,
-        InvalidData,
+        InvalidData
     }
 
     public enum ValidateOrderResult
@@ -44,6 +39,6 @@ namespace AccountingSystem.Domain.Enums
     {
         Success,
         NotFound,
-        InvalidOperation,
+        InvalidOperation
     }
 }

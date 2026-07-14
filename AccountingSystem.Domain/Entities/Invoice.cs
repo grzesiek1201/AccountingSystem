@@ -4,21 +4,23 @@ namespace AccountingSystem.Domain.Entities
 {
     public class Invoice
     {
+        public Invoice()
+        {
+            Status = InvoiceStatus.Draft;
+        }
         public int Id { get; set; }
 
         public string InvoiceNumber { get; set; }
 
         public int OrderId { get; set; }
 
-        public InvoiceStatus Status { get; set; }
+        public InvoiceStatus Status { get; private set; }
 
         public DateTime DateCreated { get; set; }
 
         public DateTime IssueDate { get; set; }
 
         public DateTime DueDate { get; set; }
-
-        public DateTime? PaidDate { get; set; }
 
         public decimal TotalAmount { get; set; }
 
@@ -39,6 +41,39 @@ namespace AccountingSystem.Domain.Entities
         public ICollection<InvoiceItem> Items { get; set; } = new List<InvoiceItem>();
 
         public ICollection<Payment> Payments { get; set; } = new List<Payment>();
+
+        public void Issue()
+        {
+            if (Status != InvoiceStatus.Draft)
+                throw new InvalidOperationException();
+
+            Status = InvoiceStatus.Issued;
+        }
+
+        public void Cancel()
+        {
+            if (Status == InvoiceStatus.Cancelled)
+                throw new InvalidOperationException();
+
+            Status = InvoiceStatus.Cancelled;
+        }
+
+        public void MarkAsOverdue()
+        {
+            if (Status != InvoiceStatus.Issued)
+                throw new InvalidOperationException();
+
+            Status = InvoiceStatus.Overdue;
+        }
+
+        public void Archive()
+        {
+            if (Status == InvoiceStatus.Draft)
+                throw new InvalidOperationException(
+                    "Draft invoice cannot be archived.");
+
+            IsInvoiceArchived = true;
+        }
     }
 
     public class InvoiceItem
@@ -46,6 +81,10 @@ namespace AccountingSystem.Domain.Entities
         public int Id { get; set; }
 
         public string ProductName { get; set; }
+        public string ProductCode { get; set; }
+        public decimal VatRate { get; set; }
+        public ProductUnit Unit { get; set; }
+
 
         public int InvoiceId { get; set; }
 

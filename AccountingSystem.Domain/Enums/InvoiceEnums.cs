@@ -19,6 +19,7 @@ namespace AccountingSystem.Domain.Enums
     {
         Success,
         NotFound,
+        InvalidOperation
     }
 
     public enum ValidateInvoiceResult
@@ -36,7 +37,7 @@ namespace AccountingSystem.Domain.Enums
         AmountExceedsRemaining
     }
 
-    public enum InvoiceStatusResult
+    public enum InvoiceOperationResult
     {
         Success,
         NotFound,
