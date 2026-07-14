@@ -4,49 +4,147 @@ All notable changes to this project are documented here.
 
 ---
 
-## [0.3.0] - 2026-06-18
+## [0.5.0] - 2026-07-12
 
 ### Added
-- Implemented Order → Invoice conversion workflow
-- Added mapper responsible for transforming orders into invoices
+- Added customer NIP field and validation
+- Expanded unit test coverage for services and domain utilities
+- Added additional validation scenarios
 
 ### Changed
-- Refactored services to improve code structure and maintainability
+- Updated service tests after architectural refactoring
+- Improved dependency injection registrations
+- Improved separation between domain rules and application services
 
 ### Fixed
-- Fixed database migration issues
-- Fixed missing database tables required by application workflow
+- Fixed issues caused by changes in domain rules
+- Fixed inconsistencies between services, validators and entities
+
+---
+
+## [0.4.0] - 2026-07-08
+
+### Added
+- Added document factory pattern for entity creation
+- Added reusable document snapshot logic
+
+### Changed
+- Replaced document mappers with conversion services
+- Simplified document service responsibilities
+- Unified document conversion workflow
+- Improved quotation → order → invoice lifecycle handling
+- Reduced coupling between document-related services
+
+### Fixed
+- Fixed architectural issues caused by duplicated conversion logic
+- Improved maintainability of document processing workflow
+
+---
+
+## [0.3.1] - 2026-07-03
+
+### Added
+- Added ProductCategory module
+- Added product-category relationship
+- Added additional service and validator tests
+
+### Changed
+- Refactored application services and DTO contracts
+- Improved dependency injection configuration
+- Improved validation flow
+- Updated EF Core model configuration and migrations
+- Improved payment status model
+
+### Fixed
+- Fixed issues after migration towards API architecture
+- Fixed outdated interfaces and project references
+
+---
+
+## [0.3.0] - 2026-06-21
+
+### Added
+- Added ASP.NET Core Web API project
+- Added Swagger configuration
+- Added API endpoints for:
+  - Customers
+  - Orders
+  - Invoices
+- Added DTO-based communication
+- Added response mappers
+- Added document snapshot support
+
+### Changed
+- Refactored customer module for Web API architecture
+- Moved DTOs from API layer into Application layer
+- Improved document mapping:
+  - Quotation → Order
+  - Order → Invoice
+- Updated product handling and database migrations
+
+### Fixed
+- Fixed issues related to API integration
+- Fixed document mapping inconsistencies
 
 ---
 
 ## [0.2.0] - 2026-06-15
 
 ### Added
-- Implemented Quotation → Order conversion workflow
-- Added document number sequence generation for quotations, orders and invoices
-- Added mapper for quotation to order transformation
-- Extended tests for quotation and order workflow
+- Added quotation to order conversion workflow
+- Added document number sequence generation
+- Added quotation to order mapper
+- Added logging support for application services
+- Added payment module and invoice settlement workflow
 
 ### Changed
 - Improved quotation validation rules
-- Refactored document handling workflow
+- Refactored document workflow handling
+- Improved service validation flow
+- Updated tests for quotation and service changes
+
+### Fixed
+- Fixed quotation conversion issues
+- Fixed validation errors in quotation workflow
 
 ---
 
 ## [0.1.0] - 2026-05-27
 
 ### Added
-- Implemented payment module
-- Integrated payments with invoice settlement workflow
+- Implemented invoice module:
+  - Invoice entity
+  - Invoice service
+  - Invoice validation
+  - Invoice UI
+
+- Implemented order module:
+  - Order entity
+  - Order service
+  - Order validation
+  - Order UI
+
+- Added Unit of Work pattern
+- Added SQL Server integration
+- Added Entity Framework Core database support
+
+### Changed
+- Refactored product, customer and quotation modules for database integration
+- Improved project architecture
+- Improved dependency injection setup
+
+### Fixed
+- Fixed database persistence issues
+- Fixed service layer issues after EF Core integration
 
 ---
 
 ## [0.0.9] - 2026-05-27
 
 ### Added
-- Implemented Order and Invoice entities
-- Added validation logic
-- Added service layer logic
+- Added Order and Invoice domain models
+- Added order and invoice services
+- Added order and invoice validation logic
 - Added console UI support for orders and invoices
 
 ---
@@ -57,7 +155,8 @@ All notable changes to this project are documented here.
 - Added QuotationValidator
 
 ### Fixed
-- Fixed issues in quotation module workflow
+- Fixed issues in quotation workflow
+- Fixed quotation module bugs
 
 ---
 
@@ -65,6 +164,7 @@ All notable changes to this project are documented here.
 
 ### Fixed
 - Fixed issues in customer, product and quotation modules
+- Improved validation handling
 
 ---
 
@@ -74,7 +174,7 @@ All notable changes to this project are documented here.
 - Added quotation validation rules
 
 ### Fixed
-- Fixed quotation UI flow issues
+- Fixed quotation UI workflow issues
 
 ---
 
@@ -94,7 +194,7 @@ All notable changes to this project are documented here.
 
 ### Changed
 - Improved product module validation
-- Improved product service logic
+- Improved ProductService logic
 - Improved product management flow
 
 ---
@@ -103,12 +203,13 @@ All notable changes to this project are documented here.
 
 ### Added
 - Implemented Product module
-- Added Product entity and category model
-- Added ProductService and validation logic
+- Added Product entity and Category model
+- Added ProductService
+- Added product validation logic
 - Added Product UI
 
 ### Changed
-- Improved product service structure and validation flow
+- Improved product service structure
 
 ---
 
@@ -144,3 +245,14 @@ All notable changes to this project are documented here.
 - Prepared project structure for future database integration
 
 ---
+
+# Planned Improvements
+
+- Complete REST API development
+- Authentication and authorization
+- Role-based access control
+- Serilog structured logging
+- Docker support
+- CI/CD pipeline
+- Web frontend
+- Reporting module
