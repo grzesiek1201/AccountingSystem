@@ -16,6 +16,9 @@ namespace AccountingSystem.Application.Helpers
                 {
                     ProductId = snapshot.ProductId,
                     ProductName = snapshot.ProductName,
+                    ProductCode = snapshot.ProductCode,
+                    VatRate = snapshot.VatRate,
+                    Unit = snapshot.Unit,
                     Quantity = snapshot.Quantity,
                     DiscountPercent = snapshot.DiscountPercent,
                     Position = snapshot.Position,
@@ -39,6 +42,9 @@ namespace AccountingSystem.Application.Helpers
                 {
                     ProductId = snapshot.ProductId,
                     ProductName = snapshot.ProductName,
+                    ProductCode = snapshot.ProductCode,
+                    VatRate = snapshot.VatRate,
+                    Unit = snapshot.Unit,
                     Quantity = snapshot.Quantity,
                     DiscountPercent = snapshot.DiscountPercent,
                     Position = snapshot.Position,
@@ -62,6 +68,9 @@ namespace AccountingSystem.Application.Helpers
                 {
                     ProductId = snapshot.ProductId,
                     ProductName = snapshot.ProductName,
+                    ProductCode = snapshot.ProductCode,
+                    VatRate = snapshot.VatRate,
+                    Unit = snapshot.Unit,
                     Quantity = snapshot.Quantity,
                     DiscountPercent = snapshot.DiscountPercent,
                     Position = snapshot.Position,
@@ -90,6 +99,9 @@ namespace AccountingSystem.Application.Helpers
             {
                 ProductId = product.Id,
                 ProductName = product.Name,
+                ProductCode = product.ProductCode,
+                VatRate = product.VatRate,
+                Unit = product.Unit,
                 Quantity = quantity,
                 DiscountPercent = discountPercent,
                 Position = position,
