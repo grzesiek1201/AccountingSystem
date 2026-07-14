@@ -61,7 +61,6 @@ namespace AccountingSystem.Application.Services
                 InvoiceId = request.InvoiceId,
                 Amount = request.Amount,
                 PaymentDate = DateTime.UtcNow,
-                Status = PaymentStatus.Paid
             };
 
             _paymentRepository.Add(payment);

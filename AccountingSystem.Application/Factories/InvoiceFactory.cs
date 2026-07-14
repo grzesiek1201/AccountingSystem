@@ -27,7 +27,6 @@ namespace AccountingSystem.Application.Factories
             var invoice = new Invoice
             {
                 CustomerId = request.CustomerId,
-                Status = InvoiceStatus.Draft,
                 DateCreated = DateTime.UtcNow,
                 IssueDate = DateTime.UtcNow,
                 DueDate = DateTime.UtcNow.AddDays(14),

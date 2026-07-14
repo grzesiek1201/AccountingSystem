@@ -24,7 +24,6 @@ namespace AccountingSystem.Application.Factories
             var quotation = new Quotation
             {
                 CustomerId = request.CustomerId,
-                Status = QuotationStatus.Draft,
                 DateCreated = DateTime.UtcNow,
                 QuotationNumber = _numberSequenceService.GetNext(DocumentType.Quotation)
             };

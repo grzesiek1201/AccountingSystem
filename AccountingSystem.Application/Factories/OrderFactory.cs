@@ -24,7 +24,6 @@ namespace AccountingSystem.Application.Factories
             var order = new Order
             {
                 CustomerId = request.CustomerId,
-                Status = OrderStatus.Draft,
                 DateCreated = DateTime.UtcNow,
                 OrderNumber = _numberSequenceService.GetNext(DocumentType.Order)
             };
