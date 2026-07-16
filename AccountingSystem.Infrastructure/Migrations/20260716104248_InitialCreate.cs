@@ -6,24 +6,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AccountingSystem.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddNumberSequences : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "Category",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Category", x => x.Id);
-                });
-
             migrationBuilder.CreateTable(
                 name: "Customers",
                 columns: table => new
@@ -31,6 +18,7 @@ namespace AccountingSystem.Infrastructure.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    NIP = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Street = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -59,25 +47,18 @@ namespace AccountingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Products",
+                name: "ProductCategories",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    IsProductArchived = table.Column<bool>(type: "bit", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Products", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Products_Category_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Category",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                    table.PrimaryKey("PK_ProductCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -86,14 +67,20 @@ namespace AccountingSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InvoiceNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    InvoiceNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IssueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     DueDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PaidDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerNIP = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerStreet = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerZipCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerCity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsInvoiceArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -113,11 +100,17 @@ namespace AccountingSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrderNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     QuotationId = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerNIP = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerStreet = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerZipCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerCity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsOrderArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -137,10 +130,16 @@ namespace AccountingSystem.Infrastructure.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    QuotationNumber = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    QuotationNumber = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     DateCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CustomerId = table.Column<int>(type: "int", nullable: false),
+                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerNIP = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerStreet = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerZipCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CustomerCity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsQuotationArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
@@ -155,52 +154,47 @@ namespace AccountingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "InvoiceItem",
+                name: "Products",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    InvoiceId = table.Column<int>(type: "int", nullable: false),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
-                    Position = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    VatRate = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    Unit = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    IsProductArchived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_InvoiceItem", x => x.Id);
+                    table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InvoiceItem_Invoices_InvoiceId",
-                        column: x => x.InvoiceId,
-                        principalTable: "Invoices",
+                        name: "FK_Products_ProductCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "ProductCategories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_InvoiceItem_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Payment",
+                name: "Payments",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     InvoiceId = table.Column<int>(type: "int", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
                     PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Method = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payment", x => x.Id);
+                    table.PrimaryKey("PK_Payments", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Payment_Invoices_InvoiceId",
+                        name: "FK_Payments_Invoices_InvoiceId",
                         column: x => x.InvoiceId,
                         principalTable: "Invoices",
                         principalColumn: "Id",
@@ -208,29 +202,34 @@ namespace AccountingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "OrderItem",
+                name: "InvoiceItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VatRate = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    Unit = table.Column<int>(type: "int", nullable: false),
+                    InvoiceId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Position = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_OrderItem", x => x.Id);
+                    table.PrimaryKey("PK_InvoiceItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_OrderItem_Orders_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Orders",
+                        name: "FK_InvoiceItems_Invoices_InvoiceId",
+                        column: x => x.InvoiceId,
+                        principalTable: "Invoices",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_OrderItem_Products_ProductId",
+                        name: "FK_InvoiceItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
@@ -238,29 +237,69 @@ namespace AccountingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "QuotationItem",
+                name: "OrderItems",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VatRate = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    Unit = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: false),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<int>(type: "int", nullable: false),
+                    DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Orders_OrderId",
+                        column: x => x.OrderId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderItems_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "QuotationItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ProductCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    VatRate = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    Unit = table.Column<int>(type: "int", nullable: false),
                     QuotationId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
                     Position = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<int>(type: "int", nullable: false),
                     DiscountPercent = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
-                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
+                    BaseUnitPrice = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
+                    Total = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_QuotationItem", x => x.Id);
+                    table.PrimaryKey("PK_QuotationItems", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_QuotationItem_Products_ProductId",
+                        name: "FK_QuotationItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_QuotationItem_Quotations_QuotationId",
+                        name: "FK_QuotationItems_Quotations_QuotationId",
                         column: x => x.QuotationId,
                         principalTable: "Quotations",
                         principalColumn: "Id",
@@ -268,13 +307,13 @@ namespace AccountingSystem.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_InvoiceItem_InvoiceId",
-                table: "InvoiceItem",
+                name: "IX_InvoiceItems_InvoiceId",
+                table: "InvoiceItems",
                 column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_InvoiceItem_ProductId",
-                table: "InvoiceItem",
+                name: "IX_InvoiceItems_ProductId",
+                table: "InvoiceItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
@@ -283,13 +322,25 @@ namespace AccountingSystem.Infrastructure.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItem_OrderId",
-                table: "OrderItem",
+                name: "IX_Invoices_InvoiceNumber",
+                table: "Invoices",
+                column: "InvoiceNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_NumberSequences_DocumentType_Year",
+                table: "NumberSequences",
+                columns: new[] { "DocumentType", "Year" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderItems_OrderId",
+                table: "OrderItems",
                 column: "OrderId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_OrderItem_ProductId",
-                table: "OrderItem",
+                name: "IX_OrderItems_ProductId",
+                table: "OrderItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
@@ -298,9 +349,21 @@ namespace AccountingSystem.Infrastructure.Migrations
                 column: "CustomerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Payment_InvoiceId",
-                table: "Payment",
+                name: "IX_Orders_OrderNumber",
+                table: "Orders",
+                column: "OrderNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Payments_InvoiceId",
+                table: "Payments",
                 column: "InvoiceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductCategories_Name",
+                table: "ProductCategories",
+                column: "Name",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
@@ -308,38 +371,44 @@ namespace AccountingSystem.Infrastructure.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuotationItem_ProductId",
-                table: "QuotationItem",
+                name: "IX_QuotationItems_ProductId",
+                table: "QuotationItems",
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_QuotationItem_QuotationId",
-                table: "QuotationItem",
+                name: "IX_QuotationItems_QuotationId",
+                table: "QuotationItems",
                 column: "QuotationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Quotations_CustomerId",
                 table: "Quotations",
                 column: "CustomerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Quotations_QuotationNumber",
+                table: "Quotations",
+                column: "QuotationNumber",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "InvoiceItem");
+                name: "InvoiceItems");
 
             migrationBuilder.DropTable(
                 name: "NumberSequences");
 
             migrationBuilder.DropTable(
-                name: "OrderItem");
+                name: "OrderItems");
 
             migrationBuilder.DropTable(
-                name: "Payment");
+                name: "Payments");
 
             migrationBuilder.DropTable(
-                name: "QuotationItem");
+                name: "QuotationItems");
 
             migrationBuilder.DropTable(
                 name: "Orders");
@@ -354,7 +423,7 @@ namespace AccountingSystem.Infrastructure.Migrations
                 name: "Quotations");
 
             migrationBuilder.DropTable(
-                name: "Category");
+                name: "ProductCategories");
 
             migrationBuilder.DropTable(
                 name: "Customers");

@@ -189,32 +189,7 @@ namespace AccountingSystem.Infrastructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("InvoiceItem");
-                });
-
-            modelBuilder.Entity("AccountingSystem.Domain.Entities.NumberSequence", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DocumentType")
-                        .HasColumnType("int");
-
-                    b.Property<int>("LastNumber")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Year")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DocumentType", "Year")
-                        .IsUnique();
-
-                    b.ToTable("NumberSequences");
+                    b.ToTable("InvoiceItems");
                 });
 
             modelBuilder.Entity("AccountingSystem.Domain.Entities.Order", b =>
@@ -545,6 +520,31 @@ namespace AccountingSystem.Infrastructure.Migrations
                     b.HasIndex("QuotationId");
 
                     b.ToTable("QuotationItems");
+                });
+
+            modelBuilder.Entity("NumberSequence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DocumentType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LastNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Year")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DocumentType", "Year")
+                        .IsUnique();
+
+                    b.ToTable("NumberSequences");
                 });
 
             modelBuilder.Entity("AccountingSystem.Domain.Entities.Invoice", b =>
