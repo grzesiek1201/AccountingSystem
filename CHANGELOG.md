@@ -2,6 +2,31 @@
 
 All notable changes to this project are documented here.
 
+
+## [0.6.0] - 2026-07-16
+
+### Added
+- Added database seeder project
+- Added new initial EF Core migration after domain model refactoring
+- Expanded domain tests for entity business rules
+- Added additional test coverage for converters and services
+
+### Changed
+- Refactored domain entities to handle their own business rules
+- Improved separation between document statuses and payment statuses
+- Updated Invoice, Order and Quotation lifecycle handling
+- Moved validation of domain operations from services into entities
+- Reworked EF Core model configuration after domain changes
+- Updated service tests to match new domain behavior
+
+### Fixed
+- Fixed inconsistencies between entities, validators and services
+- Fixed outdated tests after domain responsibility changes
+- Fixed document conversion tests
+- Fixed validation scenarios after introducing required business fields
+
+---
+
 ---
 
 ## [0.5.0] - 2026-07-12
