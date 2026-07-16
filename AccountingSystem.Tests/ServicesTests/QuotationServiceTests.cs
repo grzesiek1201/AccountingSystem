@@ -182,11 +182,16 @@ namespace AccountingSystem.Tests.ServicesTests
         {
             var req = CreateValidUpdateRequest();
 
+            var quotation = new Quotation
+            {
+                Id = 1
+            };
+
+            quotation.Send();
+            quotation.Archive();
+
             _repoMock.Setup(r => r.GetById(req.Id))
-                .Returns(new Quotation
-                {
-                    Id = 1,
-                });
+                .Returns(quotation);
 
             var result = _service.EditQuotation(req);
 
@@ -196,7 +201,12 @@ namespace AccountingSystem.Tests.ServicesTests
         [Fact]
         public void ArchiveQuotation_Existing_ShouldReturnSuccess()
         {
-            var quotation = new Quotation { Id = 1 };
+            var quotation = new Quotation
+            {
+                Id = 1
+            };
+
+            quotation.Send();
 
             _repoMock.Setup(r => r.GetById(1))
                 .Returns(quotation);

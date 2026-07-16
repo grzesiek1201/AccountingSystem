@@ -40,6 +40,7 @@ namespace AccountingSystem.Tests.ServicesTests
             return new CreateCustomerRequest
             {
                 Name = "Jan Kowalski",
+                NIP = "1234567890",
                 Email = "jan@test.com",
                 City = "Warszawa",
                 Street = "Wąska 12",
@@ -53,6 +54,7 @@ namespace AccountingSystem.Tests.ServicesTests
             {
                 Id = id,
                 Name = "Jan Kowalski",
+                NIP = "1234567890",
                 Email = "jan@test.com",
                 City = "Warszawa",
                 Street = "Wąska 12",

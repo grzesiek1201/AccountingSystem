@@ -48,13 +48,11 @@ namespace AccountingSystem.Tests.ConvertersTests
         }
 
         [Fact]
-        public void Map_ShouldReturnNull_WhenOrderIsNull()
+        public void Map_ShouldThrow_WhenOrderIsNull()
         {
             Order order = null!;
 
-            var result = _converter.Map(order);
-
-            Assert.Null(result);
+            Assert.Throws<ArgumentNullException>(() => _converter.Map(order));
         }
 
         [Fact]

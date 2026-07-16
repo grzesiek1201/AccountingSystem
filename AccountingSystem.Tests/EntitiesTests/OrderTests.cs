@@ -33,7 +33,7 @@ namespace AccountingSystem.Tests.DomainTests
         [Fact]
         public void Complete_ConfirmedOrder_ShouldChangeStatusToCompleted()
         {
-            var order = new Order();
+            var order = CreateOrderWithItem();
 
             order.Confirm();
 
@@ -58,13 +58,31 @@ namespace AccountingSystem.Tests.DomainTests
         [Fact]
         public void Cancel_CompletedOrder_ShouldThrowException()
         {
-            var order = new Order();
+            var order = CreateOrderWithItem();
 
             order.Confirm();
             order.Complete();
 
             Assert.Throws<InvalidOperationException>(
                 () => order.Cancel());
+        }
+
+
+        private static Order CreateOrderWithItem()
+        {
+            var order = new Order();
+
+            order.Items.Add(new OrderItem
+            {
+                ProductId = 1,
+                ProductName = "Test product",
+                ProductCode = "TEST-001",
+                Quantity = 1,
+                BaseUnitPrice = 100m,
+                DiscountPercent = 0m
+            });
+
+            return order;
         }
     }
 }

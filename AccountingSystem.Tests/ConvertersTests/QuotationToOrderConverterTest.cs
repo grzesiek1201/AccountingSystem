@@ -52,9 +52,7 @@ namespace AccountingSystem.Tests.ConvertersTests
         {
             Quotation quotation = null!;
 
-            var result = _converter.Map(quotation);
-
-            Assert.Null(result);
+            Assert.Throws<ArgumentNullException>(() => _converter.Map(quotation));
         }
 
         [Fact]

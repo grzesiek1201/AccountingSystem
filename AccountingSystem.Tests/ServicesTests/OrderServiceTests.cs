@@ -187,8 +187,11 @@ namespace AccountingSystem.Tests.ServicesTests
         {
             var order = new Order
             {
-                Id = 1,
+                Id = 1
             };
+
+            order.Confirm();
+            order.Archive();
 
             var request = CreateUpdateRequest();
 
@@ -236,6 +239,8 @@ namespace AccountingSystem.Tests.ServicesTests
             {
                 Id = 1
             };
+
+            order.Confirm();
 
             _repoMock.Setup(r => r.GetById(order.Id))
                 .Returns(order);

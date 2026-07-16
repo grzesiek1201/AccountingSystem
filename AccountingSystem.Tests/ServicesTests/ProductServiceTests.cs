@@ -42,8 +42,11 @@ namespace AccountingSystem.Tests.ServicesTests
         {
             return new CreateProductRequest
             {
+                ProductCode = "CHOC-001",
                 Name = "Chocolate GOLD",
-                Price = 100,
+                Price = 100m,
+                VatRate = 23m,
+                Unit = ProductUnit.Piece,
                 CategoryId = 1
             };
         }
@@ -53,8 +56,11 @@ namespace AccountingSystem.Tests.ServicesTests
             return new UpdateProductRequest
             {
                 Id = 1,
+                ProductCode = "CHOC-001",
                 Name = "Chocolate GOLD",
-                Price = 120,
+                Price = 120m,
+                VatRate = 23m,
+                Unit = ProductUnit.Piece,
                 CategoryId = 1
             };
         }

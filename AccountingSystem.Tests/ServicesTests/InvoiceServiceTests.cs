@@ -184,7 +184,12 @@ namespace AccountingSystem.Tests.ServicesTests
         [Fact]
         public void ArchiveInvoice_Existing_ShouldReturnSuccess()
         {
-            var invoice = new Invoice { Id = 1 };
+            var invoice = new Invoice
+            {
+                Id = 1
+            };
+
+            invoice.Issue();
 
             _repoMock.Setup(r => r.GetById(1))
                 .Returns(invoice);

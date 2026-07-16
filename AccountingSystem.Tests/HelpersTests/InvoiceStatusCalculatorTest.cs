@@ -23,6 +23,8 @@ namespace AccountingSystem.Tests.HelpersTests
                 DueDate = DateTime.UtcNow.AddDays(-1),
             };
 
+            invoice.Issue();
+
             _calculator.Recalculate(invoice, 50m);
 
             Assert.Equal(InvoiceStatus.Overdue, invoice.Status);
@@ -30,13 +32,15 @@ namespace AccountingSystem.Tests.HelpersTests
 
 
         [Fact]
-        public void Recalculate_ShouldSetIssued_WhenInvoiceIsFullyPaid()
+        public void Recalculate_ShouldKeepIssued_WhenInvoiceIsFullyPaid()
         {
             var invoice = new Invoice
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(-1),
             };
+
+            invoice.Issue();
 
             _calculator.Recalculate(invoice, 100m);
 
@@ -45,13 +49,15 @@ namespace AccountingSystem.Tests.HelpersTests
 
 
         [Fact]
-        public void Recalculate_ShouldSetIssued_WhenInvoiceIsBeforeDueDate()
+        public void Recalculate_ShouldKeepIssued_WhenInvoiceIsBeforeDueDate()
         {
             var invoice = new Invoice
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(5),
             };
+
+            invoice.Issue();
 
             _calculator.Recalculate(invoice, 0m);
 
@@ -60,13 +66,15 @@ namespace AccountingSystem.Tests.HelpersTests
 
 
         [Fact]
-        public void Recalculate_ShouldSetIssued_WhenPaidAmountIsGreaterThanTotalAmount()
+        public void Recalculate_ShouldKeepIssued_WhenPaidAmountIsGreaterThanTotalAmount()
         {
             var invoice = new Invoice
             {
                 TotalAmount = 100m,
                 DueDate = DateTime.UtcNow.AddDays(-5),
             };
+
+            invoice.Issue();
 
             _calculator.Recalculate(invoice, 150m);
 

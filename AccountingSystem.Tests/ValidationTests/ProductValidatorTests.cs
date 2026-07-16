@@ -15,8 +15,11 @@ namespace AccountingSystem.Tests.ServicesTests
             return new Product
             {
                 Id = 2,
+                ProductCode = "CHOC-001",
                 Name = "Chocolate GOLD",
-                Price = 100,
+                Price = 100m,
+                VatRate = 23m,
+                Unit = ProductUnit.Piece,
                 CategoryId = 1,
                 IsProductArchived = false
             };
@@ -61,8 +64,11 @@ namespace AccountingSystem.Tests.ServicesTests
             var existing = new Product
             {
                 Id = 1,
+                ProductCode = "CHOC-001",
                 Name = "Chocolate GOLD",
                 Price = 50,
+                VatRate = 23m,
+                Unit = ProductUnit.Piece,
                 CategoryId = 1
             };
 

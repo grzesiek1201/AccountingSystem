@@ -16,6 +16,7 @@ namespace AccountingSystem.Tests.ValidationTests
             {
                 Id = 1,
                 Name = "Jan Kowalski",
+                NIP = "1543561841",
                 Email = "jan@test.com",
                 City = "Warszawa",
                 Street = "Wąska 12",
